@@ -352,7 +352,7 @@
     <span>DID → Operation Times gates → local destinations</span>
   </div>
   <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-    <div class="home" onclick="showLog()" title="View the changelog">v2.8.1</div>
+    <div class="home" onclick="showLog()" title="View the changelog">v2.8.2</div>
     <div class="home" id="themeBtn" onclick="toggleTheme()">Dark mode</div>
     <div class="home" id="homeBtn" onclick="show('landing')" style="display:none">← Home</div>
   </div>
@@ -2375,13 +2375,42 @@ function renderSVG(root, orient){
     if (s) s.style.transform = 'scale(' + ES + ')';
   }
   function expReset(){ expFit(); }
-  function downloadSVG(){
-    const blob = new Blob([CURRENT_SVG], { type: 'image/svg+xml' });
+  /* ── saving files: ask WHERE first ──
+     pickSave() opens the browser's native "Save As" dialog (File System
+     Access API) BEFORE any data is generated, so the user chooses the
+     destination and filename up front. writeSave() then writes into the
+     chosen file. Browsers without the API (Firefox, Safari) fall back to
+     the classic anchor-download; cancelling the dialog aborts cleanly. */
+  function pickSave(suggestedName, desc, mime, ext){
+    if (!window.showSaveFilePicker) return Promise.resolve({ mode: 'legacy' });
+    return window.showSaveFilePicker({
+      suggestedName: suggestedName,
+      types: [{ description: desc, accept: { [mime]: [ext] } }]
+    }).then(
+      handle => ({ mode: 'picker', handle }),
+      err => (err && err.name === 'AbortError') ? { mode: 'cancelled' }
+                                                : { mode: 'legacy' }
+    );
+  }
+  async function writeSave(target, blob, filename){
+    if (target.mode === 'picker'){
+      const w = await target.handle.createWritable();
+      await w.write(blob);
+      await w.close();
+      return;
+    }
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = (CURRENT_TITLE.replace(/\s+/g, '_').toLowerCase() || 'call_map') + '_call_map.svg';
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(a.href);
+  }
+
+  async function downloadSVG(){
+    const filename = (CURRENT_TITLE.replace(/\s+/g, '_').toLowerCase() || 'call_map') + '_call_map.svg';
+    const target = await pickSave(filename, 'SVG image', 'image/svg+xml', '.svg');
+    if (target.mode === 'cancelled') return;
+    await writeSave(target, new Blob([CURRENT_SVG], { type: 'image/svg+xml' }), filename);
   }
   document.getElementById('expModal').addEventListener('click', e => {
     if (e.target.id === 'expModal') closeExpand();
@@ -2391,19 +2420,17 @@ function renderSVG(root, orient){
   });
 
   /* ── sample workbook download ── */
-  function downloadSample(){
+  async function downloadSample(){
+    const target = await pickSave('sample_call_map.xlsx', 'Excel workbook',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', '.xlsx');
+    if (target.mode === 'cancelled') return;
     const b64 = document.getElementById('samplesrc').textContent.trim();
     const bin = atob(b64), u8 = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
     const blob = new Blob([u8], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'sample_call_map.xlsx';
-    a.click();
-    URL.revokeObjectURL(a.href);
-    return false;
+    await writeSave(target, blob, 'sample_call_map.xlsx');
   }
-  document.getElementById('sampleDl').onclick = downloadSample;
+  document.getElementById('sampleDl').onclick = e => { e.preventDefault(); downloadSample(); };
 
   /* ── full PDF report: one call map per DID ── */
 
@@ -2455,9 +2482,15 @@ function renderSVG(root, orient){
     if (!MODEL) return;
     const orient = await askOrientation();
     if (orient === null) return;                                 // cancelled
-    let name = prompt('Name your PDF report:', 'call_flow_report');
-    if (name === null) return;                                   // cancelled
-    name = name.replace(/\.pdf$/i, '').replace(/[\\/:*?"<>|]/g, '').trim() || 'call_flow_report';
+    /* choose destination BEFORE generating; the picker also sets the name */
+    let name = 'call_flow_report';
+    const target = await pickSave(name + '.pdf', 'PDF document', 'application/pdf', '.pdf');
+    if (target.mode === 'cancelled') return;
+    if (target.mode === 'legacy'){
+      const entered = prompt('Name your PDF report:', name);
+      if (entered === null) return;                              // cancelled
+      name = entered.replace(/\.pdf$/i, '').replace(/[\\/:*?"<>|]/g, '').trim() || 'call_flow_report';
+    }
     const btn = document.getElementById('pdfBtn');
     btn.textContent = 'Generating…'; btn.disabled = true;
     try {
@@ -2517,7 +2550,7 @@ function renderSVG(root, orient){
         }
       }
 
-      pdf.save(name + '.pdf');
+      await writeSave(target, pdf.output('blob'), name + '.pdf');
     } catch (err){
       alert('PDF generation failed: ' + err.message);
     } finally {
@@ -2590,9 +2623,15 @@ function renderSVG(root, orient){
   }
   async function downloadAllSVGZip(){
     if (!MODEL) return;
-    let name = prompt('Name your SVG bundle:', 'call_flow_maps');
-    if (name === null) return;
-    name = name.replace(/\.zip$/i, '').replace(/[\\/:*?"<>|]/g, '').trim() || 'call_flow_maps';
+    /* choose destination BEFORE generating; the picker also sets the name */
+    let name = 'call_flow_maps';
+    const target = await pickSave(name + '.zip', 'ZIP archive', 'application/zip', '.zip');
+    if (target.mode === 'cancelled') return;
+    if (target.mode === 'legacy'){
+      const entered = prompt('Name your SVG bundle:', name);
+      if (entered === null) return;
+      name = entered.replace(/\.zip$/i, '').replace(/[\\/:*?"<>|]/g, '').trim() || 'call_flow_maps';
+    }
     const btn = document.getElementById('svgBtn');
     btn.textContent = 'Generating\u2026'; btn.disabled = true;
     try {
@@ -2605,11 +2644,7 @@ function renderSVG(root, orient){
       }
       if (!files.length) throw new Error('No routed DIDs to export.');
       const blob = await makeZip(files);
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = name + '.zip';
-      a.click();
-      URL.revokeObjectURL(a.href);
+      await writeSave(target, blob, name + '.zip');
     } catch (err){
       alert('SVG export failed: ' + err.message);
     } finally {
@@ -2683,6 +2718,26 @@ UEsDBBQAAAAIAIIe7lxGx01IlQAAAM0AAAAQAAAAZG9jUHJvcHMvYXBwLnhtbE3PTQvCMAwG4L9SdreZ
 
 All notable changes to the call flow map. Dates are 2026-07-13 unless noted;
 the map was developed iteratively in a single working session.
+
+## [2.8.2] — 2026-07-14
+### Changed — downloads now ask where to save first
+- Every download (single-map SVG, PDF report, SVG .zip bundle, sample
+  workbook) now opens the browser's native "Save As" dialog BEFORE the
+  file is generated, so the destination folder and filename are chosen
+  up front. For the PDF and zip this replaces the name prompt; the
+  dialog appears right after the orientation choice (PDF) or button
+  click (zip), and the finished file is written straight into the
+  chosen location.
+- Cancelling the dialog cleanly aborts the export.
+- Browsers without the File System Access API (Firefox, Safari) fall
+  back to the previous behaviour: a name prompt where applicable, then
+  a standard download. Tip: browsers can also be set to "always ask
+  where to save" in their own download settings.
+### Fixed
+- Downloads previously used an invisible auto-clicked link, which some
+  browser configurations block silently — the button appeared to do
+  nothing. The Save-As dialog path avoids that mechanism entirely, and
+  any write error is now surfaced instead of swallowed.
 
 ## [2.8.1] — 2026-07-13
 ### Changed
