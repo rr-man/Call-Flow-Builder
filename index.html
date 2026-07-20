@@ -398,7 +398,7 @@
     <span>DID → Operation Times gates → local destinations</span>
   </div>
   <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-    <div class="home" onclick="showLog()" title="View the changelog">v2.17.3</div>
+    <div class="home" onclick="showLog()" title="View the changelog">v2.20.3</div>
     <div class="home" id="themeBtn" onclick="toggleTheme()">Dark mode</div>
     <div class="home" id="homeBtn" onclick="show('landing')" style="display:none">← Home</div>
   </div>
@@ -2871,12 +2871,38 @@ function renderSVG(root, orient){
                                                 : { mode: 'legacy' }
     );
   }
+  /* Small confirmation toast shown when a download finishes. */
+  function showDownloadDone(fileName, where){
+    try {
+      const t = document.createElement('div');
+      t.setAttribute('role', 'status');
+      t.style.cssText = 'position:fixed; left:50%; bottom:26px; transform:translateX(-50%); z-index:90; max-width:min(460px,92vw); background:#1c2b3a; color:#fff; border-radius:10px; box-shadow:0 6px 24px rgba(0,0,0,.28); padding:14px 16px; font-family:\'Segoe UI\',Helvetica,Arial,sans-serif; font-size:13px; line-height:1.45; display:flex; gap:10px; align-items:flex-start';
+      t.innerHTML =
+        '<div style="flex:1"><div style="font-weight:700; margin-bottom:2px">\u2713 Download complete</div>' +
+        '<div style="word-break:break-all"><b>' + esc(fileName) + '</b></div>' +
+        '<div style="color:#c7d2dc; margin-top:4px">' + where + '</div></div>' +
+        '<button aria-label="Dismiss" style="background:transparent; border:0; color:#9fb0bf; font-size:18px; line-height:1; cursor:pointer; padding:0 2px">\u00d7</button>';
+      document.body.appendChild(t);
+      const kill = () => { if (t.parentNode) t.parentNode.removeChild(t); };
+      t.querySelector('button').onclick = kill;
+      setTimeout(kill, 9000);
+    } catch (e) {}
+  }
+
   async function writeSave(target, blob, filename){
     if (target.mode === 'picker'){
-      const w = await target.handle.createWritable();
-      await w.write(blob);
-      await w.close();
-      return;
+      try {
+        const w = await target.handle.createWritable();
+        await w.write(blob);
+        await w.close();
+        showDownloadDone((target.handle && target.handle.name) || filename || 'download', 'Saved to the location you chose.');
+        return;
+      } catch (e){
+        /* The picked file handle can go stale between choosing the location and
+           actually writing — notably on Windows when building the file took a
+           while — surfacing as "state had changed since it was read from disk".
+           Fall through to a normal download so the file still saves. */
+      }
     }
     /* Legacy download fallback (browsers without the Save-As picker, e.g.
        Firefox/Safari, or a file:// page). The anchor must be in the DOM for
@@ -2892,6 +2918,7 @@ function renderSVG(root, orient){
     document.body.appendChild(a);
     a.click();
     setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 4000);
+    showDownloadDone(filename || 'download', 'Saved to your browser\u2019s Downloads folder \u2014 press Ctrl+J (\u2318\u21e7J on Mac) to open your downloads.');
   }
 
   /* floating tooltip for .tip icons — rendered on <body> so the modal's
@@ -2949,13 +2976,16 @@ function renderSVG(root, orient){
 
   /* ── full PDF report: one call map per DID ── */
 
-  function rasterize(svgStr, W, H){
+  function rasterize(svgStr, W, H, wantScale){
     return new Promise((resolve, reject) => {
       /* Cap the raster so neither side exceeds the browser canvas limit — an
          over-large canvas rasterises blank, which showed up as empty PDF pages
          on tall maps (e.g. large exports, or maps with greeting bubbles). */
       const MAXPX = 8000;
-      let scale = Math.min(2.2, 3200 / W, MAXPX / W, MAXPX / H);
+      /* Resolution is chosen by the caller (wantScale) to balance crispness
+         against file size; always clamp to the browser canvas limit. */
+      let scale = wantScale || Math.min(3, MAXPX / W, MAXPX / H);
+      scale = Math.min(scale, MAXPX / W, MAXPX / H);
       if (!(scale > 0) || !isFinite(scale)) scale = 1;
       /* Give the root <svg> explicit pixel size + UTF-8 so every browser draws
          it (some render nothing from a viewBox-only SVG loaded as an image). */
@@ -2967,6 +2997,7 @@ function renderSVG(root, orient){
         const c = document.createElement('canvas');
         c.width = Math.round(W * scale); c.height = Math.round(H * scale);
         const ctx = c.getContext('2d');
+        ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
         ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, c.width, c.height);
         ctx.drawImage(img, 0, 0, c.width, c.height);
         URL.revokeObjectURL(url);
@@ -3050,6 +3081,7 @@ function renderSVG(root, orient){
     const ergKeys = Object.keys(MODEL.erg).sort((a, b) => (+a || 0) - (+b || 0));
     const extKeys = Object.keys(MODEL.ext).sort((a, b) => (+a || 0) - (+b || 0));
     const qKeys   = Object.keys(MODEL.q || {}).sort((a, b) => (+a || 0) - (+b || 0));
+    const _hasTx  = _txAll().length;
     return new Promise(resolve => {
       const wrap = document.createElement('div');
       wrap.className = 'modal';
@@ -3115,7 +3147,12 @@ function renderSVG(root, orient){
 
             '<p class="hint" style="margin:14px 0 6px; font-weight:700; color:inherit">Format</p>' +
             '<label style="display:inline-flex; gap:6px; align-items:center; margin-right:16px; cursor:pointer"><input type="checkbox" id="scPdf" checked> PDF</label>' +
-            '<label style="display:inline-flex; gap:6px; align-items:center; cursor:pointer"><input type="checkbox" id="scSvg"> SVG (.zip)</label>' +
+            '<label style="display:inline-flex; gap:6px; align-items:center; margin-right:16px; cursor:pointer"><input type="checkbox" id="scSvg"> SVG (.zip)</label>' +
+            '<label style="display:inline-flex; gap:6px; align-items:center; margin-right:16px; cursor:pointer"><input type="checkbox" id="scHtml"> Interactive HTML</label>' +
+            '<label style="display:inline-flex; gap:6px; align-items:center; cursor:pointer"><input type="checkbox" id="scTxt"' + (_hasTx ? ' checked' : ' disabled') + '> Transcripts (.txt) <span class="hint" style="font-size:11px">(' + (_hasTx ? _hasTx + ' attached' : 'none attached') + ')</span></label>' +
+            '<p class="hint" style="margin:14px 0 6px; font-weight:700; color:inherit">PDF size <span class="hint" style="font-weight:400; font-size:11px">(how the map is laid out in the PDF)</span></p>' +
+            '<label style="display:block; padding:3px 0; cursor:pointer"><input type="radio" name="scPdfSize" value="fit" checked> Fit to page <span class="hint" style="font-size:11px">&mdash; whole map scaled onto A4 (default)</span></label>' +
+            '<label style="display:block; padding:3px 0; cursor:pointer"><input type="radio" name="scPdfSize" value="actual"> Actual size &mdash; 100% <span class="hint" style="font-size:11px">&mdash; one page sized to the map; opens at 100%</span></label>' +
 
             '<p class="hint" style="margin:14px 0 6px; font-weight:700; color:inherit">Orientation</p>' +
             '<label style="display:inline-flex; gap:6px; align-items:center; margin-right:16px; cursor:pointer"><input type="checkbox" id="scH" checked> Horizontal</label>' +
@@ -3198,48 +3235,147 @@ function renderSVG(root, orient){
           });
         }
         if (!items.length){ alert('No routed DIDs to export.'); return; }
-        const formats = { pdf: wrap.querySelector('#scPdf').checked, svg: wrap.querySelector('#scSvg').checked };
-        if (!formats.pdf && !formats.svg){ alert('Choose at least one format: PDF or SVG.'); return; }
+        const formats = { pdf: wrap.querySelector('#scPdf').checked, svg: wrap.querySelector('#scSvg').checked, html: wrap.querySelector('#scHtml').checked, txt: !!(wrap.querySelector('#scTxt') && wrap.querySelector('#scTxt').checked) };
+        if (!formats.pdf && !formats.svg && !formats.html && !formats.txt){ alert('Choose at least one format: PDF, SVG, Interactive HTML or Transcripts.'); return; }
         const orients = [];
         if (wrap.querySelector('#scH').checked) orients.push('h');
         if (wrap.querySelector('#scV').checked) orients.push('v');
         if (!orients.length){ alert('Choose at least one orientation: Horizontal or Vertical.'); return; }
-        done({ routes, items, name, formats, orients });
+        const pdfSize = (wrap.querySelector('input[name="scPdfSize"]:checked') || {}).value || 'fit';
+        done({ routes, items, name, formats, orients, pdfSize });
       };
     });
   }
 
   /* build one orientation's PDF and return { name, data:Uint8Array } (no save) */
+  /* All attached greeting transcripts as one plain-text file. */
+  function _txAll(){
+    return Object.keys(IVR_TX).filter(function(k){ return IVR_TX[k] && String(IVR_TX[k]).trim(); })
+                 .sort(function(a,b){ return (+a||0)-(+b||0); });
+  }
+  function buildTranscriptsTxt(){
+    const keys = _txAll();
+    let out = 'Call Flow \u2014 Greeting Transcripts\r\n'
+            + 'Generated ' + new Date().toLocaleString() + '\r\n'
+            + keys.length + ' transcript' + (keys.length === 1 ? '' : 's') + '\r\n'
+            + '========================================\r\n\r\n';
+    keys.forEach(function(k){
+      const ivr = (typeof MODEL !== 'undefined' && MODEL && MODEL.ivr) ? MODEL.ivr[k] : null;
+      const nm = ivr && ivr.name ? ' \u2014 ' + ivr.name : '';
+      const gr = ivr && ivr.greet ? '  (greeting: ' + ivr.greet + ')' : '';
+      out += 'IVR ' + k + nm + gr + '\r\n'
+           + '----------------------------------------\r\n'
+           + String(IVR_TX[k]).trim() + '\r\n\r\n';
+    });
+    return out;
+  }
+
+  /* Self-contained interactive HTML: the map at 100% with scroll/pan and
+     zoom controls (+/- , 100%, Fit, ctrl+wheel, drag). Opens at 100%. */
+  function buildInteractiveHTML(m, orient){
+    const svg = renderSVG(m.root, orient);
+    const title = String(m.title || 'Call flow').replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]));
+    return '<!doctype html><html lang="en"><head><meta charset="utf-8">' +
+      '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+      '<title>' + title + '</title><style>' +
+      'html,body{margin:0;height:100%;font-family:Segoe UI,Helvetica,Arial,sans-serif;background:#eef2f5;color:#1c2b3a}' +
+      '#bar{position:fixed;top:0;left:0;right:0;height:46px;display:flex;align-items:center;gap:8px;padding:0 14px;background:#1c2b3a;color:#fff;box-shadow:0 1px 6px rgba(0,0,0,.2);z-index:5}' +
+      '#bar b{font-size:14px;font-weight:600}#bar .sp{flex:1}#bar .zl{font-size:12px;color:#9fb0bf;min-width:44px;text-align:right}' +
+      '#bar button{background:#2a3f52;color:#fff;border:0;border-radius:6px;padding:7px 12px;font-size:14px;line-height:1;cursor:pointer}' +
+      '#bar button:hover{background:#37506a}' +
+      '#stage{position:absolute;top:46px;left:0;right:0;bottom:0;overflow:auto;cursor:grab}#stage.drag{cursor:grabbing}' +
+      '#inner{transform-origin:0 0}#inner svg{display:block}' +
+      '</style></head><body>' +
+      '<div id="bar"><b>' + title + '</b><span class="sp"></span>' +
+      '<button id="zo" title="Zoom out">\u2212</button>' +
+      '<button id="z100" title="Actual size">100%</button>' +
+      '<button id="zi" title="Zoom in">+</button>' +
+      '<button id="zf" title="Fit to window">Fit</button>' +
+      '<span class="zl" id="zlbl">100%</span></div>' +
+      '<div id="stage"><div id="inner">' + svg + '</div></div>' +
+      '<script>(function(){' +
+      'var stage=document.getElementById("stage"),inner=document.getElementById("inner"),lbl=document.getElementById("zlbl");' +
+      'var svg=inner.querySelector("svg");var z=1;' +
+      'var vb=(svg.getAttribute("viewBox")||"0 0 1000 1000").split(/\\s+/);var W=+vb[2]||1000,Hh=+vb[3]||1000;' +
+      'svg.removeAttribute("width");svg.removeAttribute("height");svg.style.width=W+"px";svg.style.height=Hh+"px";' +
+      'function apply(){inner.style.transform="scale("+z+")";inner.style.width=(W*z)+"px";inner.style.height=(Hh*z)+"px";lbl.textContent=Math.round(z*100)+"%";}' +
+      'function set(nz,cx,cy){nz=Math.max(0.1,Math.min(8,nz));var r=stage.getBoundingClientRect();if(cx==null)cx=r.width/2;if(cy==null)cy=r.height/2;var ax=(stage.scrollLeft+cx)/z,ay=(stage.scrollTop+cy)/z;z=nz;apply();stage.scrollLeft=ax*z-cx;stage.scrollTop=ay*z-cy;}' +
+      'function fit(){var r=stage.getBoundingClientRect();set(Math.min(r.width/W,r.height/Hh)||1,0,0);stage.scrollLeft=0;stage.scrollTop=0;}' +
+      'document.getElementById("zi").onclick=function(){set(z*1.25);};' +
+      'document.getElementById("zo").onclick=function(){set(z/1.25);};' +
+      'document.getElementById("z100").onclick=function(){set(1);};' +
+      'document.getElementById("zf").onclick=fit;' +
+      'stage.addEventListener("wheel",function(e){if(e.ctrlKey||e.metaKey){e.preventDefault();var r=stage.getBoundingClientRect();set(z*(e.deltaY<0?1.1:0.9),e.clientX-r.left,e.clientY-r.top);}},{passive:false});' +
+      'var dr=false,px,py;stage.addEventListener("mousedown",function(e){dr=true;px=e.clientX;py=e.clientY;stage.classList.add("drag");e.preventDefault();});' +
+      'window.addEventListener("mousemove",function(e){if(!dr)return;stage.scrollLeft-=e.clientX-px;stage.scrollTop-=e.clientY-py;px=e.clientX;py=e.clientY;});' +
+      'window.addEventListener("mouseup",function(){dr=false;stage.classList.remove("drag");});' +
+      'apply();' +
+      '})();<\/script></body></html>';
+  }
+
   async function buildPDF(opt, maps, orient, suffix){
     const { jsPDF } = window.jspdf;
     const landscape = orient === 'h';
-    const pdf = new jsPDF({ orientation: landscape ? 'landscape' : 'portrait', unit: 'mm', format: 'a4' });
+    const size = opt.pdfSize || 'fit';
+    const pdf = new jsPDF({ orientation: landscape ? 'landscape' : 'portrait', unit: 'mm', format: 'a4', compress: true });
     const pageW = landscape ? 297 : 210, pageH = landscape ? 210 : 297, mx = 10;
+    const PXMM = 25.4 / 96;          /* CSS px -> mm at 96dpi (i.e. 100%) */
+    const MAXMM = 5000;              /* stay under the jsPDF ~14400pt page ceiling */
+    const sizeLabel = { fit: 'fit to page', actual: 'actual size (100%)' }[size] || 'fit to page';
+
+    /* jsPDF's built-in fonts only cover Latin-1, so characters like the arrow
+       (\u2192) render as garbage in cover/header text. Map them to safe ASCII
+       (the SVG image keeps the real \u2192 since it's drawn by the browser font). */
+    const ptxt = s => String(s)
+      .replace(/\u2192/g, '->').replace(/\u2190/g, '<-')
+      .replace(/[\u2018\u2019\u201b]/g, "'").replace(/[\u201c\u201d]/g, '"')
+      .replace(/[\u2013\u2014]/g, '-').replace(/\u2026/g, '...')
+      .replace(/[^\x00-\xff]/g, '?');
 
     /* cover */
     let y = 24;
     pdf.setFont('helvetica', 'bold'); pdf.setFontSize(22); pdf.setTextColor(28, 43, 58);
     pdf.text('Call Flow Report', mx, y); y += 9;
     pdf.setFont('helvetica', 'normal'); pdf.setFontSize(11); pdf.setTextColor(91, 107, 124);
-    pdf.text('Generated ' + new Date().toLocaleString() + '  ·  ' +
+    pdf.text(ptxt('Generated ' + new Date().toLocaleString() + '  ·  ' +
              maps.length + ' map' + (maps.length === 1 ? '' : 's') +
              (opt.routes === 'active' ? '  ·  active routes only' : '') +
-             '  ·  ' + (landscape ? 'horizontal' : 'vertical') + '  ·  ' +
+             '  ·  ' + (landscape ? 'horizontal' : 'vertical') + '  ·  ' + sizeLabel + '  ·  ' +
              Object.keys(MODEL.ivr).length + ' IVRs  ·  ' +
-             Object.keys(MODEL.dg).length + ' dial groups  ·  ' + Object.keys(MODEL.erg).length + ' ERGs', mx, y);
+             Object.keys(MODEL.dg).length + ' dial groups  ·  ' + Object.keys(MODEL.erg).length + ' ERGs'), mx, y);
     y += 12;
     pdf.setFontSize(12); pdf.setTextColor(28, 43, 58); pdf.setFont('helvetica', 'bold');
     pdf.text('In this report', mx, y); y += 7;
     pdf.setFont('helvetica', 'normal'); pdf.setFontSize(10.5); pdf.setTextColor(61, 74, 87);
-    maps.forEach(m => { pdf.text(m.title, mx + 2, y); y += 6.2; });
+    maps.forEach(m => { pdf.text(ptxt(m.title), mx + 2, y); y += 6.2; });
 
     /* one section per selected map */
     for (const m of maps){
       const svg  = renderSVG(m.root, orient);
       const vb   = svg.match(/viewBox="0 0 (\d+(?:\.\d+)?) (\d+(?:\.\d+)?)"/);
       const W = +vb[1], H = +vb[2];
-      const canvas = await rasterize(svg, W, H);
+      /* Render at 2x the map's own pixels so it stays crisp when zoomed in,
+         while being far smaller than a blanket 3x. Lossless PNG + PDF stream
+         compression keep the file reasonable. */
+      const wantScale = 2;
+      const canvas = await rasterize(svg, W, H, wantScale);
+      const png = canvas.toDataURL('image/png');
 
+      if (size === 'actual'){
+        /* one page sized to the map at 100% (clamped to the page ceiling) */
+        const titleH = 12;
+        let iw = W * PXMM, ih = H * PXMM;
+        const cap = Math.min(1, (MAXMM - 8) / iw, (MAXMM - titleH - 8) / ih);
+        if (cap < 1){ iw *= cap; ih *= cap; }
+        const pw = iw + 8, ph = ih + titleH + 6;
+        pdf.addPage([pw, ph], pw >= ph ? 'l' : 'p');
+        pdf.setFont('helvetica', 'bold'); pdf.setFontSize(13); pdf.setTextColor(28, 43, 58);
+        pdf.text(ptxt(m.title), 4, 8);
+        pdf.addImage(png, 'PNG', 4, titleH, iw, ih);
+        continue;
+      }
+
+      /* fit (default): whole map scaled to A4 width, sliced down the page */
       const contentTop = 20;
       const availH = pageH - contentTop - 8;
       const drawW  = pageW - 2 * mx;
@@ -3250,7 +3386,7 @@ function renderSVG(root, orient){
       for (let s = 0; s < slices; s++){
         pdf.addPage();
         pdf.setFont('helvetica', 'bold'); pdf.setFontSize(13); pdf.setTextColor(28, 43, 58);
-        pdf.text(m.title + (slices > 1 ? '   (part ' + (s + 1) + ' of ' + slices + ')' : ''), mx, 14);
+        pdf.text(ptxt(m.title + (slices > 1 ? '   (part ' + (s + 1) + ' of ' + slices + ')' : '')), mx, 14);
         const srcY = s * pageSlicePx;
         const srcH = Math.min(pageSlicePx, canvas.height - srcY);
         const slice = document.createElement('canvas');
@@ -3258,10 +3394,11 @@ function renderSVG(root, orient){
         const sctx = slice.getContext('2d');
         sctx.fillStyle = '#ffffff'; sctx.fillRect(0, 0, slice.width, slice.height);
         sctx.drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH);
-        pdf.addImage(slice.toDataURL('image/jpeg', 0.92), 'JPEG',
+        pdf.addImage(slice.toDataURL('image/png'), 'PNG',
                      mx, contentTop, drawW, srcH * mmPerPx);
       }
     }
+    if (size === 'actual'){ try { pdf.setDisplayMode('original'); } catch (e) {} }
     return { name: (opt.name || 'call_flow') + suffix + '.pdf', data: new Uint8Array(pdf.output('arraybuffer')) };
   }
 
@@ -3341,16 +3478,20 @@ function renderSVG(root, orient){
        shown immediately — showSaveFilePicker (and the legacy download click)
        must run inside the modal's click gesture, before the async rasterising. */
     const multiOrient = opt.orients.length > 1;
-    const pdfCount = opt.formats.pdf ? opt.orients.length : 0;
-    const svgCount = opt.formats.svg ? maps.length * opt.orients.length : 0;
-    const total = pdfCount + svgCount;
+    const pdfCount  = opt.formats.pdf  ? opt.orients.length : 0;
+    const svgCount  = opt.formats.svg  ? maps.length * opt.orients.length : 0;
+    const htmlCount = opt.formats.html ? maps.length * opt.orients.length : 0;
+    const txtCount  = (opt.formats.txt && _txAll().length) ? 1 : 0;
+    const total = pdfCount + svgCount + htmlCount + txtCount;
     if (!total){ alert('Nothing to export.'); return; }
 
     const single = total === 1;
     let ext = '.zip', mime = 'application/zip', desc = 'ZIP archive';
     if (single){
-      if (pdfCount === 1){ ext = '.pdf'; mime = 'application/pdf'; desc = 'PDF document'; }
-      else               { ext = '.svg'; mime = 'image/svg+xml';  desc = 'SVG image'; }
+      if (pdfCount === 1){ ext = '.pdf';  mime = 'application/pdf'; desc = 'PDF document'; }
+      else if (svgCount === 1){ ext = '.svg';  mime = 'image/svg+xml'; desc = 'SVG image'; }
+      else if (htmlCount === 1){ ext = '.html'; mime = 'text/html';    desc = 'HTML page'; }
+      else                     { ext = '.txt';  mime = 'text/plain';    desc = 'Text file'; }
     }
     let name = opt.name || 'call_flow';
     const target = await pickSave(name + ext, desc, mime, ext);   // <-- during the gesture
@@ -3381,6 +3522,19 @@ function renderSVG(root, orient){
             files.push({ name: base + suffix + '.svg', data: enc.encode(renderSVG(m.root, orient)) });
           }
         }
+      }
+      if (opt.formats.html){
+        const used = {};
+        for (const m of maps){
+          let base = m.slug; if (used[base]) base += '_' + (used[base]++); else used[base] = 1;
+          for (const orient of opt.orients){
+            const suffix = multiOrient ? (orient === 'h' ? '_horizontal' : '_vertical') : '';
+            files.push({ name: base + suffix + '.html', data: enc.encode(buildInteractiveHTML(m, orient)) });
+          }
+        }
+      }
+      if (opt.formats.txt && _txAll().length){
+        files.push({ name: name + '_transcripts.txt', data: enc.encode(buildTranscriptsTxt()) });
       }
       if (single){
         await writeSave(target, new Blob([files[0].data], { type: mime }), name + ext);
@@ -3491,6 +3645,78 @@ UEsDBBQAAAAIAIIe7lxGx01IlQAAAM0AAAAQAAAAZG9jUHJvcHMvYXBwLnhtbE3PTQvCMAwG4L9SdreZ
 
 All notable changes to the call flow map. Dates are 2026-07-13 unless noted;
 the map was developed iteratively in a single working session.
+
+## [2.20.3] — 2026-07-17
+### Fixed
+- PDF cover and page headers showed garbage (e.g. "DID 8474033053 !' IVR")
+  where the map title's arrow appeared. jsPDF's built-in font can't render the
+  → arrow, so PDF text now uses "->" instead (and other non-Latin-1 characters
+  are mapped to safe equivalents). The app view and HTML export keep the →.
+
+## [2.20.2] — 2026-07-17
+### Fixed
+- PDF maps looked blurry after the size reduction because wide maps were being
+  rendered below their native resolution. They're now rendered at 2x the map's
+  own pixels (lossless PNG, PDF compression on): crisp when zoomed, and about
+  half the size of the earlier high-quality version. A raster PDF still can't
+  match the tiny vector SVG/HTML files — true vector PDF is possible but needs
+  an added renderer.
+
+## [2.20.1] — 2026-07-17
+### Changed
+- Much smaller PDF files. Maps are now rendered at the resolution the output
+  actually needs (about 200 DPI at the printed page for Fit to page, 2x native
+  for Actual size) instead of a blanket 3x, and PDF stream compression is
+  enabled. Still lossless PNG, so it stays crisp. (A PDF embeds the map as an
+  image, so it can't be as tiny as the vector SVG/HTML exports, but it's now a
+  fraction of the previous size.)
+
+## [2.20.0] — 2026-07-17
+### Added
+- A "Download complete" confirmation now appears after a download finishes,
+  showing the file name and where it went — the location you chose (Save-As)
+  or your browser's Downloads folder (with a reminder that Ctrl+J opens the
+  downloads list). Note: browsers don't expose the saved file's folder path to
+  a web page, so a direct link to the folder isn't possible.
+
+## [2.19.2] — 2026-07-17
+### Changed
+- Sharper PDF exports. Maps are now embedded as lossless PNG instead of JPEG
+  (no more fuzzy text or lines) and rendered at higher resolution (up to 3x,
+  capped for safety), so exports stay crisp and easy to read. SVG and
+  Interactive HTML exports were already vector and unchanged.
+
+## [2.19.1] — 2026-07-17
+### Changed
+- Removed the "Tile across A4 pages" PDF size option. PDF size is now just
+  Fit to page or Actual size (100%).
+
+## [2.19.0] — 2026-07-17
+### Added
+- Download options now include a **Transcripts (.txt)** file: one plain-text
+  file listing every attached greeting transcript, labelled by IVR number and
+  name (and greeting filename when known). It's auto-selected when transcripts
+  are attached, bundles into the .zip alongside the maps, or downloads on its
+  own if it's the only format chosen.
+
+## [2.18.1] — 2026-07-17
+### Fixed
+- Export could fail with "state had changed since it was read from disk" when
+  saving via the native Save-As dialog: the chosen file handle can go stale
+  while a large file is being built (common on Windows, and more likely with
+  the new Actual-size / Tile / HTML exports). If writing to the picked file
+  fails, the export now falls back to a normal download so the file still
+  saves.
+
+## [2.18.0] — 2026-07-17
+### Added
+- Download options now let you choose how the export is sized, so maps stay
+  readable instead of shrinking to fit the page:
+  - PDF size: **Fit to page** (default), **Actual size — 100%** (one page sized
+    to the map; opens at 100%), or **Tile across A4 pages** (full size, split
+    across pages to print and tape together).
+  - **Interactive HTML** format: a self-contained file that opens the map at
+    100% with scroll/pan and zoom controls (+/−, 100%, Fit, ctrl+wheel, drag).
 
 ## [2.17.3] — 2026-07-17
 ### Fixed
