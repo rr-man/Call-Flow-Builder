@@ -398,7 +398,7 @@
     <span>DID → Operation Times gates → local destinations</span>
   </div>
   <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-    <div class="home" onclick="showLog()" title="View the changelog">v2.17.2</div>
+    <div class="home" onclick="showLog()" title="View the changelog">v2.17.3</div>
     <div class="home" id="themeBtn" onclick="toggleTheme()">Dark mode</div>
     <div class="home" id="homeBtn" onclick="show('landing')" style="display:none">← Home</div>
   </div>
@@ -2878,11 +2878,20 @@ function renderSVG(root, orient){
       await w.close();
       return;
     }
+    /* Legacy download fallback (browsers without the Save-As picker, e.g.
+       Firefox/Safari, or a file:// page). The anchor must be in the DOM for
+       the click to fire in some browsers, and the object URL must stay alive
+       until the download has actually started — revoking it immediately
+       cancels the download, so the file never saves. */
+    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
+    a.href = url;
+    a.download = filename || 'download';
+    a.rel = 'noopener';
+    a.style.display = 'none';
+    document.body.appendChild(a);
     a.click();
-    URL.revokeObjectURL(a.href);
+    setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 4000);
   }
 
   /* floating tooltip for .tip icons — rendered on <body> so the modal's
@@ -3482,6 +3491,16 @@ UEsDBBQAAAAIAIIe7lxGx01IlQAAAM0AAAAQAAAAZG9jUHJvcHMvYXBwLnhtbE3PTQvCMAwG4L9SdreZ
 
 All notable changes to the call flow map. Dates are 2026-07-13 unless noted;
 the map was developed iteratively in a single working session.
+
+## [2.17.3] — 2026-07-17
+### Fixed
+- Map export sometimes didn't save on browsers without the native Save-As
+  picker (Firefox, Safari, or a file:// page): the fallback download anchor
+  wasn't added to the page (so the click did nothing in some browsers) and
+  its object URL was revoked immediately, cancelling the download before it
+  started. The anchor is now attached and the URL is released only after the
+  download begins. Where the browser is set to ask, this also restores the
+  "where to save" prompt; Chrome/Edge still get the full Save-As dialog.
 
 ## [2.17.2] — 2026-07-17
 ### Changed
