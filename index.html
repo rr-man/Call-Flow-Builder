@@ -333,8 +333,12 @@
   @keyframes modalIn { from { opacity:0; transform: scale(.965); } to { opacity:1; transform: scale(1); } }
 
   /* ── smooth zoom (reference map + expanded view) ── */
-  #canvas { transition: transform .18s ease-out; }
-  #expBody svg { transition: transform .18s ease-out; }
+  /* zoom steps are instant: animating the size would desync the scroll anchoring */
+  .zpct { display:inline-block; min-width:44px; text-align:center; font-weight:700; font-size:12px; color:#5b6b7c; vertical-align:middle; margin-right:8px; }
+  body.dark .zpct { color:#9fb0bf; }
+  .toolbar button:disabled, .orb:disabled { opacity:.45; cursor:default; pointer-events:none; }
+  @keyframes dlspin { to { transform: rotate(360deg); } }
+  .dlspinner { width:26px; height:26px; border-radius:50%; border:3px solid rgba(255,255,255,.22); border-top-color:#e0a800; animation: dlspin .8s linear infinite; flex:none; margin-top:1px; }
 
   /* ── theme cross-fade: temporary class during toggle, scoped to chrome (not the big SVGs) ── */
   body.thx, body.thx header, body.thx .panel, body.thx .card, body.thx .orb,
@@ -398,7 +402,7 @@
     <span>DID → Operation Times gates → local destinations</span>
   </div>
   <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-    <div class="home" onclick="showLog()" title="View the changelog">v2.22.0</div>
+    <div class="home" onclick="showLog()" title="View the changelog">v2.25.0</div>
     <div class="home" id="themeBtn" onclick="toggleTheme()">Dark mode</div>
     <div class="home" id="homeBtn" onclick="show('landing')" style="display:none">← Home</div>
   </div>
@@ -500,8 +504,9 @@
 <!-- ══════════ MAP ══════════ -->
 <section id="mapview" style="display:none">
   <div class="toolbar">
-    <button onclick="zoom(1.15)">Zoom in</button>
-    <button onclick="zoom(1/1.15)">Zoom out</button>
+    <button id="rmZi" onclick="zoom(1.25)">Zoom in</button>
+    <button id="rmZo" onclick="zoom(1/1.25)">Zoom out</button>
+    <span class="zpct" id="rmPct">100%</span>
     <button onclick="resetZoom()">Reset</button>
     Scroll to pan · hover elements for detail
   </div>
@@ -1726,8 +1731,30 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   /* ── zoom ── */
   let s = 1;
   const c = document.getElementById('canvas');
-  function zoom(f){ s = Math.min(3, Math.max(0.3, s*f)); c.style.transform = 'scale('+s+')'; }
-  function resetZoom(){ s = 1; c.style.transform = 'scale(1)'; }
+  const RM_MIN = 0.3, RM_MAX = 4, RM_W = 1200;       /* natural width of the reference map */
+  function rmApply(){
+    c.style.width = (Math.abs(s - 1) < 0.001) ? '' : (RM_W * s) + 'px';  /* '' = stylesheet default */
+    const pct = document.getElementById('rmPct');
+    if (pct) pct.textContent = Math.round(s * 100) + '%';
+    const zi = document.getElementById('rmZi'), zo = document.getElementById('rmZo');
+    if (zi) zi.disabled = s >= RM_MAX - 0.001;
+    if (zo) zo.disabled = s <= RM_MIN + 0.001;
+  }
+  function zoom(f){
+    const prev = s;
+    s = Math.min(RM_MAX, Math.max(RM_MIN, s * f));
+    if (s === prev) return;
+    const w = document.getElementById('wrap');
+    const cx = w.scrollLeft + w.clientWidth / 2, cy = w.scrollTop + w.clientHeight / 2;
+    let wr = w.getBoundingClientRect(), cr = c.getBoundingClientRect();
+    const u = (cx - (cr.left - wr.left + w.scrollLeft)) / prev;
+    const v = (cy - (cr.top  - wr.top  + w.scrollTop )) / prev;
+    rmApply();
+    wr = w.getBoundingClientRect(); cr = c.getBoundingClientRect();
+    w.scrollLeft = (cr.left - wr.left + w.scrollLeft) + u * s - w.clientWidth / 2;
+    w.scrollTop  = (cr.top  - wr.top  + w.scrollTop ) + v * s - w.clientHeight / 2;
+  }
+  function resetZoom(){ s = 1; rmApply(); }
 
   /* ── theme ── */
   function applyTheme(dark){
@@ -2298,20 +2325,46 @@ function renderSVG(root, orient){
     n._id = nid++;
     out.push(`<g class="nd" data-n="${n._id}" data-p="${parent ? parent._id : ''}" data-d="${n.d}">`);
 
+    /* one shared trunk from this node to all of its options, drawn once by
+       the parent; each option only adds its own stub below */
+    if (n.kids.length){
+      if (H_){
+        const sx = bx + BW, kbx = X0 + (n.d + 1) * COLW;
+        n._mid = sx + (kbx - sx) / 2;
+        out.push(`<path d="M${sx},${p.y} H${n._mid}" fill="none" stroke="#9fb0bf" stroke-width="1.6"/>`);
+        if (n.kids.length > 1){
+          const ys = n.kids.map(k => place(k).y);
+          out.push(`<path d="M${n._mid},${Math.min(...ys, p.y)} V${Math.max(...ys, p.y)}" fill="none" stroke="#9fb0bf" stroke-width="1.6"/>`);
+        }
+      } else {
+        const sy = p.y + bh/2;
+        const tops = n.kids.map(k => place(k).y - hOf(k)/2);
+        n._mid = sy + (Math.min(...tops) - sy) / 2;
+        out.push(`<path d="M${p.x},${sy} V${n._mid}" fill="none" stroke="#9fb0bf" stroke-width="1.6"/>`);
+        if (n.kids.length > 1){
+          const xs = n.kids.map(k => place(k).x);
+          out.push(`<path d="M${Math.min(...xs, p.x)},${n._mid} H${Math.max(...xs, p.x)}" fill="none" stroke="#9fb0bf" stroke-width="1.6"/>`);
+        }
+      }
+    }
+
     if (parent){
       const pp = place(parent);
       const col  = n.kind === 'loop' ? '#e0a800' : '#9fb0bf';
       const dash = (n.kind === 'loop' || n.kind === 'ref') ? ' stroke-dasharray="5 4"' : '';
-      let d, lx, ly;
+      let d, guide, lx, ly;
       if (H_){
-        const sx = pp.x + BW, mid = sx + (bx - sx) / 2;
-        d = `M${sx},${pp.y} H${mid} V${p.y} H${bx - 4}`;
+        const sx = pp.x + BW, mid = parent._mid;
+        guide = `M${sx},${pp.y} H${mid} V${p.y} H${bx - 4}`;   /* full route, for the Trace dot */
+        d = `M${mid},${p.y} H${bx - 4}`;
         lx = mid; ly = p.y;
       } else {
-        const sy = pp.y + hOf(parent)/2, mid = sy + ((by) - sy) / 2;
-        d = `M${pp.x},${sy} V${mid} H${p.x} V${by - 4}`;
+        const sy = pp.y + hOf(parent)/2, mid = parent._mid;
+        guide = `M${pp.x},${sy} V${mid} H${p.x} V${by - 4}`;
+        d = `M${p.x},${mid} V${by - 4}`;
         lx = p.x; ly = mid;
       }
+      out.push(`<path class="tg" d="${guide}" fill="none" stroke="none"/>`);
       out.push(`<path d="${d}" fill="none" stroke="${col}" stroke-width="1.6"${dash} marker-end="url(#tip)"/>`);
       if (n.edge){
         const w = Math.max(22, 9 + 6.2 * n.edge.length);
@@ -2794,7 +2847,7 @@ function renderSVG(root, orient){
     const chainFor = leaf => {                          /* connector paths, root → leaf */
       const paths = [];
       for (let g = byId[leaf]; g; g = byId[g.dataset.p]){
-        const p = g.querySelector(':scope > path');
+        const p = g.querySelector(':scope > path.tg');   /* invisible full-route guide */
         if (p) paths.unshift(p);
         if (g.dataset.p === '') break;
       }
@@ -2834,25 +2887,42 @@ function renderSVG(root, orient){
   }
 
   /* ── expanded (full-screen) map ── */
-  let ES = 1;
+  let ES = 1, EFIT = 1;
+  const EMAX = 4;                                    /* 400 percent ceiling */
+  function expDims(){
+    const s = document.getElementById('expBody').firstElementChild;
+    if (!s) return null;
+    const vb = (s.getAttribute('viewBox') || '0 0 1000 1000').split(' ');
+    return { s, w: +vb[2], h: +vb[3] };
+  }
+  function expMinFit(){
+    const b = document.getElementById('expBody'), d = expDims();
+    if (!d) return 1;
+    const f = Math.min((b.clientWidth - 36) / d.w, (b.clientHeight - 36) / d.h, 1);
+    return (f > 0 && isFinite(f)) ? f : 1;
+  }
+  function expApply(){
+    const d = expDims();
+    if (!d) return;
+    d.s.style.width  = (d.w * ES) + 'px';            /* real size: the scroll area grows */
+    d.s.style.height = (d.h * ES) + 'px';
+    const pct = document.getElementById('expPct');
+    if (pct) pct.textContent = Math.round(ES * 100) + '%';
+    const zi = document.getElementById('expZi'), zo = document.getElementById('expZo');
+    if (zi) zi.disabled = ES >= EMAX - 0.001;
+    if (zo) zo.disabled = ES <= EFIT + 0.001;
+  }
   function expSync(){
     const b = document.getElementById('expBody');
     b.innerHTML = CURRENT_SVG;
-    const s = b.firstElementChild;
-    s.style.transformOrigin = 'top left';
     document.getElementById('expH').classList.toggle('on', ORIENT === 'h');
     document.getElementById('expV').classList.toggle('on', ORIENT === 'v');
     expFit();
   }
   function expFit(){
-    const b = document.getElementById('expBody');
-    const s = b.firstElementChild;
-    if (!s) return;
-    const vb = (s.getAttribute('viewBox') || '0 0 1000 1000').split(' ');
-    const w = +vb[2], h = +vb[3];
-    ES = Math.min((b.clientWidth - 36) / w, (b.clientHeight - 36) / h, 1);
-    if (ES <= 0 || !isFinite(ES)) ES = 1;
-    s.style.transform = 'scale(' + ES + ')';
+    EFIT = expMinFit();
+    ES = EFIT;
+    expApply();
   }
   function expOrient(o){
     if (!LAST) return;
@@ -2867,16 +2937,30 @@ function renderSVG(root, orient){
     expSync();
   }
   window.addEventListener('resize', () => {
-    if (document.getElementById('expModal').style.display === 'flex') expFit();
+    if (document.getElementById('expModal').style.display !== 'flex') return;
+    EFIT = expMinFit();                              /* re-clamp only; keep the user's zoom */
+    ES = Math.min(EMAX, Math.max(EFIT, ES));
+    expApply();
   });
   function closeExpand(){
     document.getElementById('expModal').style.display = 'none';
     document.body.style.overflow = '';
   }
   function expZoom(f){
-    ES = Math.min(4, Math.max(0.2, ES * f));
-    const s = document.getElementById('expBody').firstElementChild;
-    if (s) s.style.transform = 'scale(' + ES + ')';
+    const prev = ES;
+    ES = Math.min(EMAX, Math.max(EFIT, ES * f));
+    if (ES === prev) return;
+    const b = document.getElementById('expBody'), d = expDims();
+    if (!d){ expApply(); return; }
+    /* keep the visible centre anchored while stepping */
+    const cx = b.scrollLeft + b.clientWidth / 2, cy = b.scrollTop + b.clientHeight / 2;
+    let br = b.getBoundingClientRect(), sr = d.s.getBoundingClientRect();
+    const u = (cx - (sr.left - br.left + b.scrollLeft)) / prev;
+    const v = (cy - (sr.top  - br.top  + b.scrollTop )) / prev;
+    expApply();
+    br = b.getBoundingClientRect(); sr = d.s.getBoundingClientRect();
+    b.scrollLeft = (sr.left - br.left + b.scrollLeft) + u * ES - b.clientWidth / 2;
+    b.scrollTop  = (sr.top  - br.top  + b.scrollTop ) + v * ES - b.clientHeight / 2;
   }
   function expReset(){ expFit(); }
   /* ── saving files: ask WHERE first ──
@@ -2897,11 +2981,35 @@ function renderSVG(root, orient){
     );
   }
   /* Small confirmation toast shown when a download finishes. */
-  function showDownloadDone(fileName, where){
+  /* Centred “Generating…” card with a spinner, shown while a download is
+     being built. It is replaced in place by the completion card (both are
+     centred), or cleared on error. Only the heavy multi-format export starts
+     it — quick single-file saves go straight to the completion card. */
+  let _dlProgress = null;
+  function showDownloadProgress(fileName){
+    hideDownloadProgress();
     try {
       const t = document.createElement('div');
       t.setAttribute('role', 'status');
-      t.style.cssText = 'position:fixed; left:50%; bottom:26px; transform:translateX(-50%); z-index:90; max-width:min(460px,92vw); background:#1c2b3a; color:#fff; border-radius:10px; box-shadow:0 6px 24px rgba(0,0,0,.28); padding:14px 16px; font-family:\'Segoe UI\',Helvetica,Arial,sans-serif; font-size:13px; line-height:1.45; display:flex; gap:10px; align-items:flex-start';
+      t.style.cssText = 'position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:90; max-width:min(460px,92vw); background:#1c2b3a; color:#fff; border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,.4); padding:20px 22px; font-family:\'Segoe UI\',Helvetica,Arial,sans-serif; font-size:13px; line-height:1.45; display:flex; gap:13px; align-items:flex-start';
+      t.innerHTML =
+        '<div class="dlspinner"></div>' +
+        '<div style="flex:1"><div style="font-weight:700; margin-bottom:2px">Generating your download\u2026</div>' +
+        '<div style="word-break:break-all; color:#c7d2dc">' + esc(fileName) + '</div></div>';
+      document.body.appendChild(t);
+      _dlProgress = t;
+    } catch (e) {}
+  }
+  function hideDownloadProgress(){
+    try { if (_dlProgress && _dlProgress.parentNode) _dlProgress.parentNode.removeChild(_dlProgress); } catch (e) {}
+    _dlProgress = null;
+  }
+  function showDownloadDone(fileName, where){
+    hideDownloadProgress();
+    try {
+      const t = document.createElement('div');
+      t.setAttribute('role', 'status');
+      t.style.cssText = 'position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:90; max-width:min(460px,92vw); background:#1c2b3a; color:#fff; border-radius:10px; box-shadow:0 6px 24px rgba(0,0,0,.28); padding:14px 16px; font-family:\'Segoe UI\',Helvetica,Arial,sans-serif; font-size:13px; line-height:1.45; display:flex; gap:10px; align-items:flex-start';
       t.innerHTML =
         '<div style="flex:1"><div style="font-weight:700; margin-bottom:2px">\u2713 Download complete</div>' +
         '<div style="word-break:break-all"><b>' + esc(fileName) + '</b></div>' +
@@ -3149,7 +3257,7 @@ function renderSVG(root, orient){
             '<p class="hint" style="margin:0 0 6px; font-weight:700; color:inherit">What to download</p>' +
             '<label style="display:block; padding:4px 0; cursor:pointer"><input type="radio" name="scScope" value="all" checked> All active information with routes from the DID <span class="hint" style="font-size:11px">(all ' + routed.length + ' DIDs, active routes)</span>' +
               '<span class="tip" tabindex="0" data-tip="One map per routed DID (all ' + routed.length + ').\nEach traced from the DID to its local destinations: extension, ERG, dial group, voicemail, queue.\nActive routes only \u2014 loop-backs, shown-above references and dead-ends are hidden.\nStandalone items with no DID pointing at them are not included.">i</span></label>' +
-            '<label style="display:block; padding:4px 0; cursor:pointer"><input type="radio" name="scScope" value="allfull"> Download all routes <span class="hint" style="font-size:11px">(Full tree \u2014 every DID, IVR, group, queue &amp; extension)</span>' +
+            '<div class="scAdv" style="display:none">' + '<label style="display:block; padding:4px 0; cursor:pointer"><input type="radio" name="scScope" value="allfull"> Download all routes <span class="hint" style="font-size:11px">(Full tree \u2014 every DID, IVR, group, queue &amp; extension)</span>' +
               '<span class="tip" tabindex="0" data-tip="A map for every object in the system, full unpruned tree:\n\u2022 all ' + MODEL.dids.length + ' DIDs, including unassigned ones\n\u2022 all ' + ivrKeys.length + ' IVRs\n\u2022 all ' + dgKeys.length + ' dial / ring groups\n\u2022 all ' + ergKeys.length + ' ERGs\n\u2022 all ' + qKeys.length + ' queues (with their agents)\n\u2022 all ' + extKeys.length + ' extensions\nNothing is pruned \u2014 after-hours paths, loop-backs and references are all kept.">i</span></label>' +
             '<label style="display:block; padding:4px 0; cursor:pointer"><input type="radio" name="scScope" value="pick"> A specific destination <span class="hint" style="font-size:11px">(choose one or more)</span>' +
               '<span class="tip" tabindex="0" data-tip="Pick individual DIDs, IVRs, dial groups, ERGs or extensions \u2014 including ones with no DID routing. Use the Routes toggle to export active routes only or all routes.">i</span></label>' +
@@ -3165,28 +3273,38 @@ function renderSVG(root, orient){
               grp('ERGs', ergKeys.length, ergRows) +
               grp('Extensions', extKeys.length, extRows) +
             '</div>' +
-            '<div data-pickwarn style="display:none; margin:6px 0 2px; padding:8px 10px; border:1px solid #e6b800; background:#fff8e1; color:#7a5b00; border-radius:8px; font-size:12px; font-weight:600">&#9888; No option selected \u2014 no file to download. Select at least one destination.</div>' +
-
-            '<p class="hint" style="margin:14px 0 6px; font-weight:700; color:inherit">File name</p>' +
-            '<input type="text" id="scName" value="' + esc(defaultName) + '" style="width:100%; padding:8px; font-size:14px; border-radius:6px; box-sizing:border-box">' +
+            '<div data-pickwarn style="display:none; margin:6px 0 2px; padding:8px 10px; border:1px solid #e6b800; background:#fff8e1; color:#7a5b00; border-radius:8px; font-size:12px; font-weight:600">&#9888; No option selected \u2014 no file to download. Select at least one destination.</div>' + '</div>' +
 
             '<p class="hint" style="margin:14px 0 6px; font-weight:700; color:inherit">Format</p>' +
-            '<label style="display:inline-flex; gap:6px; align-items:center; margin-right:16px; cursor:pointer"><input type="checkbox" id="scPdf" checked> PDF</label>' +
-            '<label style="display:inline-flex; gap:6px; align-items:center; margin-right:16px; cursor:pointer"><input type="checkbox" id="scSvg"> SVG (.zip)</label>' +
-            '<label style="display:inline-flex; gap:6px; align-items:center; margin-right:16px; cursor:pointer"><input type="checkbox" id="scHtml"> Interactive HTML</label>' +
-            '<label style="display:inline-flex; gap:6px; align-items:center; cursor:pointer"><input type="checkbox" id="scTxt"' + (_hasTx ? ' checked' : ' disabled') + '> Transcripts (.txt) <span class="hint" style="font-size:11px">(' + (_hasTx ? _hasTx + ' attached' : 'none attached') + ')</span></label>' +
-            '<p class="hint" style="margin:14px 0 6px; font-weight:700; color:inherit">PDF size <span class="hint" style="font-weight:400; font-size:11px">(how the map is laid out in the PDF)</span></p>' +
-            '<label style="display:block; padding:3px 0; cursor:pointer"><input type="radio" name="scPdfSize" value="fit" checked> Fit to page <span class="hint" style="font-size:11px">&mdash; whole map scaled onto A4 (default)</span></label>' +
-            '<label style="display:block; padding:3px 0; cursor:pointer"><input type="radio" name="scPdfSize" value="actual"> Actual size &mdash; 100% <span class="hint" style="font-size:11px">&mdash; one page sized to the map; opens at 100%</span></label>' +
-            '<p class="hint" style="margin:14px 0 6px; font-weight:700; color:inherit">PDF rendering</p>' +
-            '<label style="display:block; padding:3px 0; cursor:pointer"><input type="radio" name="scPdfRender" value="vector" checked> Vector <span class="hint" style="font-size:11px">&mdash; sharp at any zoom, selectable text, smallest file (recommended)</span></label>' +
-            '<label style="display:block; padding:3px 0; cursor:pointer"><input type="radio" name="scPdfRender" value="image"> Image <span class="hint" style="font-size:11px">&mdash; embeds a picture of the map (prior method)</span></label>' +
+            '<div>' +
+              '<label style="display:inline-flex; gap:6px; align-items:center; margin-right:16px; cursor:pointer"><input type="checkbox" id="scPdf" checked> PDF <span class="tip" tabindex="0" data-tip="Print-ready document \u2014 one map per page, ready to print or share.">i</span></label>' +
+              '<label style="display:inline-flex; gap:6px; align-items:center; cursor:pointer"><input type="checkbox" id="scTxt"' + (_hasTx ? ' checked' : ' disabled') + '> Transcripts (.txt) <span class="hint" style="font-size:11px">(' + (_hasTx ? _hasTx + ' attached' : 'none attached') + ')</span> <span class="tip" tabindex="0" data-tip="All attached greeting transcripts collected into one plain-text file.">i</span></label>' +
+            '</div>' +
+            '<div class="scAdv" style="display:none; margin-top:6px">' +
+              '<label style="display:inline-flex; gap:6px; align-items:center; margin-right:16px; cursor:pointer"><input type="checkbox" id="scSvg"> SVG (.zip) <span class="tip" tabindex="0" data-tip="One scalable vector image per map, bundled together in a .zip archive.">i</span></label>' +
+              '<label style="display:inline-flex; gap:6px; align-items:center; cursor:pointer"><input type="checkbox" id="scHtml"> Interactive HTML <span class="tip" tabindex="0" data-tip="Self-contained web page per map with pan, zoom and hover-for-detail.">i</span></label>' +
+            '</div>' +
+            '<p class="hint" style="margin:14px 0 6px; font-weight:700; color:inherit">PDF layout <span class="hint" style="font-weight:400; font-size:11px">(how the map is laid out in the PDF)</span></p>' +
+            '<label style="display:block; padding:3px 0; cursor:pointer"><input type="radio" name="scPdfSize" value="fit" checked> Fit to page <span class="hint" style="font-size:11px">&mdash; whole map scaled onto A4 (default)</span> <span class="tip" tabindex="0" data-tip="The whole map is scaled to fit a single A4 page. Best for a quick overview or printing.">i</span></label>' +
+            '<div class="scAdv" style="display:none">' +
+              '<label style="display:block; padding:3px 0; cursor:pointer"><input type="radio" name="scPdfSize" value="actual"> Actual size &mdash; 100% <span class="hint" style="font-size:11px">&mdash; one page sized to the map; opens at 100%</span> <span class="tip" tabindex="0" data-tip="One page sized to the full map and opened at 100%. Best for large maps you want to read at native size.">i</span></label>' +
+            '</div>' +
+            '<p class="hint" style="margin:14px 0 6px; font-weight:700; color:inherit">Rendering</p>' +
+            '<div style="display:flex; align-items:center; gap:8px; padding:5px 2px">' +
+              '<span style="font-size:12px; font-weight:700; background:#e1f5ee; color:#0f6e56; padding:2px 10px; border-radius:12px">Vector</span>' +
+              '<span class="hint" style="font-size:11px">sharp at any zoom, selectable text, smallest file</span>' +
+              '<span class="tip" tabindex="0" data-tip="Vector is now the only rendering mode \u2014 the Image option was removed. Vector stays sharp at any zoom, keeps text selectable, and produces the smallest file.">i</span>' +
+            '</div>' +
 
-            '<p class="hint" style="margin:14px 0 6px; font-weight:700; color:inherit">Orientation</p>' +
-            '<label style="display:inline-flex; gap:6px; align-items:center; margin-right:16px; cursor:pointer"><input type="checkbox" id="scH" checked> Horizontal</label>' +
-            '<label style="display:inline-flex; gap:6px; align-items:center; cursor:pointer"><input type="checkbox" id="scV"> Vertical</label>' +
+            '<div class="scAdv" style="display:none">' +
+              '<p class="hint" style="margin:14px 0 6px; font-weight:700; color:inherit">Orientation</p>' +
+              '<label style="display:inline-flex; gap:6px; align-items:center; margin-right:16px; cursor:pointer"><input type="checkbox" id="scH" checked> Horizontal <span class="tip" tabindex="0" data-tip="Lay the map out left-to-right.">i</span></label>' +
+              '<label style="display:inline-flex; gap:6px; align-items:center; cursor:pointer"><input type="checkbox" id="scV"> Vertical <span class="tip" tabindex="0" data-tip="Lay the map out top-to-bottom.">i</span></label>' +
+            '</div>' +
 
-            '<div style="display:flex; gap:10px; justify-content:flex-end; margin-top:18px">' +
+            '<div style="display:flex; gap:10px; align-items:center; margin-top:18px">' +
+              '<button type="button" class="orb" data-adv="1" style="border:0; background:none; color:#2477c7; padding:6px 2px"><span data-advcaret>\u25B8</span> Advanced options</button>' +
+              '<div style="flex:1"></div>' +
               '<button class="orb" data-cancel="1">Cancel</button>' +
               '<button class="orb on" data-go="1">\u2b07 Download</button>' +
             '</div>' +
@@ -3224,6 +3342,14 @@ function renderSVG(root, orient){
         t.querySelector('.scCaret').style.transform = open ? '' : 'rotate(90deg)';
       });
       const done = v => { wrap.remove(); resolve(v); };
+      const advBtn = wrap.querySelector('[data-adv]');
+      const advCaret = wrap.querySelector('[data-advcaret]');
+      let advOpen = false;
+      advBtn.onclick = () => {
+        advOpen = !advOpen;
+        wrap.querySelectorAll('.scAdv').forEach(e => { e.style.display = advOpen ? '' : 'none'; });
+        advCaret.textContent = advOpen ? '\u25BE' : '\u25B8';
+      };
       const ptog = wrap.querySelector('[data-picktoggle]');
       wrap.querySelectorAll('input[name="scScope"]').forEach(r =>
         r.onchange = () => {
@@ -3236,7 +3362,7 @@ function renderSVG(root, orient){
       wrap.addEventListener('click', e => { if (e.target === wrap) done(null); });
       wrap.querySelector('[data-go]').onclick = () => {
         const scope  = wrap.querySelector('input[name="scScope"]:checked').value;
-        const name   = (wrap.querySelector('#scName').value || defaultName).replace(/[\\/:*?"<>|]/g, '').trim() || defaultName;
+        const name   = defaultName;
         let routes, items;
         if (scope === 'all'){
           routes = 'active';
@@ -3270,7 +3396,7 @@ function renderSVG(root, orient){
         if (wrap.querySelector('#scV').checked) orients.push('v');
         if (!orients.length){ alert('Choose at least one orientation: Horizontal or Vertical.'); return; }
         const pdfSize = (wrap.querySelector('input[name="scPdfSize"]:checked') || {}).value || 'fit';
-        const pdfRender = (wrap.querySelector('input[name="scPdfRender"]:checked') || {}).value || 'vector';
+        const pdfRender = 'vector';
         done({ routes, items, name, formats, orients, pdfSize, pdfRender });
       };
     });
@@ -3589,6 +3715,7 @@ function renderSVG(root, orient){
 
     const btn = document.getElementById('dlBtn');
     if (btn){ btn.textContent = 'Generating\u2026'; btn.disabled = true; }
+    showDownloadProgress(single ? (name + ext) : (name + '.zip'));
     try {
       const enc = new TextEncoder();
       const files = [];                                          // { name, data:Uint8Array }
@@ -3628,6 +3755,7 @@ function renderSVG(root, orient){
         await writeSave(target, blob, name + '.zip');
       }
     } catch (err){
+      hideDownloadProgress();
       alert('Export failed: ' + err.message);
     } finally {
       if (btn){ btn.textContent = '\u21E9 Download\u2026'; btn.disabled = false; }
@@ -3669,8 +3797,9 @@ function renderSVG(root, orient){
         <button class="orb" id="expH" onclick="expOrient('h')">Horizontal</button>
         <button class="orb" id="expV" onclick="expOrient('v')">Vertical</button>
         <button class="orb" id="expThemeBtn" onclick="toggleTheme()">Dark mode</button>
-        <button class="orb" onclick="expZoom(1.2)">Zoom in</button>
-        <button class="orb" onclick="expZoom(1/1.2)">Zoom out</button>
+        <button class="orb" id="expZi" onclick="expZoom(1.25)">Zoom in</button>
+        <button class="orb" id="expZo" onclick="expZoom(1/1.25)">Zoom out</button>
+        <span class="zpct" id="expPct">100%</span>
         <button class="orb" onclick="expReset()">Fit</button>
         <button class="orb" onclick="downloadSVG()">&#8681; Download SVG</button>
         <button class="orb" onclick="closeExpand()">&#10005; Close</button>
@@ -3730,6 +3859,64 @@ UEsDBBQAAAAIAIIe7lxGx01IlQAAAM0AAAAQAAAAZG9jUHJvcHMvYXBwLnhtbE3PTQvCMAwG4L9SdreZ
 
 All notable changes to the call flow map. Dates are 2026-07-13 unless noted;
 the map was developed iteratively in a single working session.
+
+## [2.25.0] — 2026-07-21
+### Added
+- The Download options dialog now has a Basic / Advanced split. Basic shows
+  the common choices; an “Advanced options” toggle reveals the rest.
+- Tooltips on every option in the dialog (format, PDF layout, rendering,
+  orientation), matching the existing “i” hover style.
+### Changed
+- Basic view shows: All active information with routes, PDF + Transcripts,
+  Fit to page, and Vector rendering.
+- Advanced view adds: Download all routes, A specific destination (with its
+  picklist), SVG + Interactive HTML, Actual-size PDF layout, and Orientation.
+### Removed
+- The File name field. Downloads use the automatic name; the browser’s Save
+  As dialog still lets you rename on the spot.
+- The PDF rendering “Image” option. Vector is now the only mode (shown as a
+  badge) and is always used.
+
+## [2.24.1] — 2026-07-21
+### Added
+- A centred “Generating your download…” card with an animated spinner now
+  appears while a multi-format export (PDF/ZIP) is being built, then is
+  replaced in place by the completion notice.
+### Changed
+- The “Download complete” notice is now centred on screen instead of anchored
+  to the bottom.
+
+## [2.24.0] — 2026-07-21
+### Added
+- Live zoom percentage readout in the expanded map view and on the reference
+  map toolbar (100% = natural size; after Fit it shows the actual fit value).
+### Changed
+- Zoom now resizes the drawing instead of CSS-scaling it, so the scroll area
+  grows with the zoom — nothing gets clipped at any zoom level, in both the
+  expanded map view and the reference map.
+- Unified zoom step of 1.25x per click; Zoom out always steps down exactly
+  one level. Fit (expanded view) and Reset (reference map) are the only
+  resets.
+- Zoom limits with visible feedback: max 400% everywhere; min = the fit
+  scale in the expanded view and 30% on the reference map. Buttons gray out
+  at the limits.
+- Stepping keeps the visible centre anchored instead of drifting toward the
+  top-left corner.
+- Resizing the window no longer resets the expanded-view zoom; it only
+  re-clamps the level if the fit minimum changed.
+- Zoom steps are instant: the step animation was removed because animating
+  the size desynchronises the scroll-position anchoring.
+
+## [2.23.0] — 2026-07-17
+### Changed
+- Every IVR (and any node with options) now draws a single shared trunk line
+  to all of its options instead of each option re-drawing the full connector.
+  Options keep their own short stub with the arrowhead and per-route styling.
+  Standard routes look identical; loop-back/reference routes now show a
+  neutral trunk with only their own stub dashed amber, and in the reveal
+  animation the trunk appears together with its IVR.
+- Live Trace is unaffected: each option carries an invisible full-route guide
+  path, so the trace dot travels box-to-box along the same course as before.
 
 ## [2.22.0] — 2026-07-17
 ### Changed
