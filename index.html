@@ -88,6 +88,19 @@
   .didbtn { display:inline-block; margin:0 8px 8px 0; padding:9px 14px; border:1px solid #c7d2dc; background:#fff;
             border-radius:8px; cursor:pointer; font-size:13px; font-family:inherit; text-align:left; }
   .didbtn:hover { border-color:#3498db; background:#eef4fb; }
+  .destfilter { border:1px solid #e6edf3; background:#f7fafc; border-radius:9px; padding:10px 12px; margin:12px 0 4px; }
+  body.dark .destfilter { background:#141d26; border-color:#2b3a4a; }
+  .dfhead { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+  .dftitle { font-size:12px; font-weight:700; color:#3d4a57; }
+  body.dark .dftitle { color:#c7d2dc; }
+  .dfspace { flex:1; }
+  .dfall { font-size:11px; padding:3px 9px; border:1px solid #c7d2dc; background:#fff; border-radius:6px; cursor:pointer; color:#3d4a57; font-family:inherit; }
+  body.dark .dfall { background:#18222c; border-color:#2b3a4a; color:#dce5ec; }
+  .dfboxes { display:flex; flex-wrap:wrap; gap:6px 16px; }
+  .dfbox { display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:#3d4a57; cursor:pointer; }
+  body.dark .dfbox { color:#dce5ec; }
+  .dfsw { width:13px; height:13px; border-radius:3px; border:1.5px solid; display:inline-block; flex:none; }
+  .dfwarn { font-size:11px; color:#b06a00; margin-top:8px; }
   .didbtn.inroute:not(.sel) { border-color:#27ae60; background:#f2fbf5; }
   .didbtn.inroute:not(.sel) span { color:#1c5c3a; }
   .didbtn.dgb.inroute:not(.sel) { border-color:#16a89e; background:#e2f4f4; }
@@ -402,7 +415,7 @@
     <span>DID → Operation Times gates → local destinations</span>
   </div>
   <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-    <div class="home" onclick="showLog()" title="View the changelog">v2.25.0</div>
+    <div class="home" onclick="showLog()" title="View the changelog">v2.28.0</div>
     <div class="home" id="themeBtn" onclick="toggleTheme()">Dark mode</div>
     <div class="home" id="homeBtn" onclick="show('landing')" style="display:none">← Home</div>
   </div>
@@ -1947,7 +1960,7 @@ function colIdx(letters){
 
 /* ═══════════════ PBXware model from the sheets ═══════════════ */
 
-const numOf = s => { const m = String(s || '').match(/^\s*(\d+)/); return m ? m[1] : null; };
+const numOf = s => { const m = String(s || '').match(/(\d+)/); return m ? m[1] : null; };  // first number anywhere
 
 /* "09;00" / "9:00" / "17:00:00" / Excel day-fraction "0.7083…" → "09:00" */
 function fmtClock(v){
@@ -1998,7 +2011,8 @@ function buildModel(sheets){
   const M = { dids: [], ext: {}, ivr: {}, dg: {}, erg: {}, vm: {}, q: {}, agents: {}, ot: new Set(), otInfo: {}, cid: {} };
 
   const sExt = findSheet(sheets, 'extension');
-  if (sExt) sExt.slice(1).forEach(r => { if (/^\d+$/.test(r[2] || '')) M.ext[r[2]] = r[0] || ''; });
+  /* some exports omit the header row on this sheet — the numeric-number guard skips a header if present */
+  if (sExt) sExt.forEach(r => { if (/^\d+$/.test(r[2] || '')) M.ext[r[2]] = r[0] || ''; });
 
   /* Caller ID sheet: number | name | accountid | system | emergency | <trunk columns…>.
      Collect the distinct phone-number caller IDs assigned to each extension. */
@@ -2115,9 +2129,20 @@ function traceDID(M, did){
   const N = (kind, label, sub, edge) => ({ kind, label, sub: sub || '', edge: edge || '', kids: [] });
 
   function dest(raw, edge, path){
-    const t = numOf(raw);
-    if (/directory/i.test(raw)) return N('leaf', 'Directory', 'dial by name', edge);
-    if (!t && /voicemail/i.test(raw)) return N('vm', 'Remote Access', 'voicemail login', edge);
+    const s = String(raw || '');
+    const t = numOf(s);
+    if (/directory/i.test(s)) return N('leaf', 'Directory', 'dial by name', edge);
+    /* honour an explicit type word in the label, e.g. "IVR - 192 Directions",
+       "Voicemail - 110", "Extension 101 - Desk 1" (numbers can collide across types) */
+    if (t){
+      if (/voicemail/i.test(s)            && M.vm[t])  return N('vm', 'Voicemail ' + t, M.vm[t], edge);
+      if (/\bivr\b/i.test(s)              && M.ivr[t]) return ivrNode(t, edge, path);
+      if (/(?:dial|ring)\s*group/i.test(s) && M.dg[t])  return dgNode(t, edge);
+      if (/\berg\b/i.test(s)              && M.erg[t]) return ergNode(t, edge);
+      if (/queue/i.test(s)                && M.q[t])   return qNode(t, edge);
+      if (/ext(?:ension)?/i.test(s)       && M.ext[t]) return N('ext', 'Ext ' + t, M.ext[t], edge);
+    }
+    if (!t && /voicemail/i.test(s)) return N('vm', 'Remote Access', 'voicemail login', edge);
     if (t && M.ivr[t])  return ivrNode(t, edge, path);
     if (t && M.dg[t])   return dgNode(t, edge);
     if (t && M.erg[t])  return ergNode(t, edge);
@@ -2154,7 +2179,9 @@ function traceDID(M, did){
       findings.loops.push({ ivr: n, key: edge });
       return N('loop', 'Repeat IVR ' + n, iv.name, edge);
     }
-    if (drawn.has(n)) return N('ref', 'IVR ' + n, iv.name + ' — shown above', edge);
+    /* A menu reached from more than one place is expanded in full at each spot
+       so every branch is a complete map on its own. Real cycles are still caught
+       by the path check above and shown as a "Repeat" node. */
     drawn.add(n);
 
     const me = N('ivr', 'IVR ' + n, iv.name, edge);
@@ -2185,8 +2212,10 @@ function traceDID(M, did){
     d.members.forEach((m, i) => {
       me.kids.push(N('ext', 'Ext ' + m, M.ext[m] || '', i === 0 ? 'ring all' : ''));
     });
-    const v = numOf(d.last);
-    if (v) me.kids.push(N('vm', 'Voicemail ' + v, (M.ext[v] || M.vm[v] || '') + ' — no answer', 'no answer'));
+    if (d.last && String(d.last).trim()){          // no-answer fall-through to the group's last destination
+      const c = dest(d.last, 'no answer', []);
+      if (c) me.kids.push(c);
+    }
     return withOT(n, 'Dial Group', me, edge, []);
   }
 
@@ -2431,6 +2460,7 @@ function renderSVG(root, orient){
   const ergEl    = document.getElementById('ergpick');
   const mapEl    = document.getElementById('mapout');
   let MODEL = null, LAST = null, ORIENT = 'h';
+  let DEST_FILTER = { ivr:true, ext:true, vm:true, dg:true, erg:true, q:true };  // Map-a-DID local-destination filter
 
   drop.addEventListener('click', () => input.click());
   drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
@@ -2534,16 +2564,73 @@ function renderSVG(root, orient){
 
 
       if (MODEL.dids.length){
+        DEST_FILTER = { ivr:true, ext:true, vm:true, dg:true, erg:true, q:true };   // reset per file
+        const _FK = [['ivr','IVR'],['ext','Extension'],['vm','Voicemail'],['dg','Dial Group'],['erg','ERG'],['q','Queue']];
+        const _present = new Set();
+        MODEL.dids.forEach(d => { if (!d.val) return; try { const r = traceDID(MODEL, d); (function s(nd){ _present.add(nd.kind); nd.kids.forEach(s); })(r.root); } catch (e) {} });
+        const _chips = _FK.filter(([k]) => _present.has(k));
+        let _filterRow = '';
+        if (_chips.length){
+          _filterRow = '<div class="destfilter">' +
+            '<div class="dfhead"><span class="dftitle">Show local destinations</span>' +
+              '<span class="tip" tabindex="0" data-tip="Filter which terminating destination types appear in the map. All shown by default; unticking one hides those endpoints and any route that leads only to them.">i</span>' +
+              '<span class="dfspace"></span>' +
+              '<button type="button" class="dfall" data-dfall>Clear all</button></div>' +
+            '<div class="dfboxes" data-dfboxes>' +
+              _chips.map(([k,label]) => { const sk = SKIN[k] || SKIN.leaf; return '<label class="dfbox"><input type="checkbox" data-df="' + k + '" checked> <i class="dfsw" style="background:' + sk[0] + '; border-color:' + sk[2] + '"></i> ' + label + '</label>'; }).join('') +
+            '</div>' +
+            '<div class="dfwarn" data-dfwarn style="display:none">\u26a0 With none selected the map has no endpoints to show.</div>' +
+          '</div>';
+        }
         let h = '<div class="panel"><h3 class="ptog">Map a DID<span class="cvt">&#9662;</span></h3>' +
-                '<div class="pbody"><p class="hint">The full journey: DID &rarr; IVR &rarr; every option &rarr; terminating destination.</p><div>';
+                '<div class="pbody"><p class="hint">The full journey: DID &rarr; IVR &rarr; every option &rarr; terminating destination.</p>' + _filterRow + '<div>';
         MODEL.dids.forEach((d, i) => {
           const to = d.dest ? (d.dest + (d.val ? ' ' + d.val : '')) : 'no destination set';
           h += '<button class="didbtn" data-i="' + i + '"><b>' + d.nr + '</b><span>&rarr; ' + to + '</span></button>';
         });
         pickEl.innerHTML = h + '</div></div></div>';
         pickEl.querySelectorAll('.didbtn').forEach(b => {
-          b.onclick = () => { select(b); LAST = { type: 'did', v: MODEL.dids[+b.dataset.i] }; render(); };
+          b.onclick = () => { select(b); const d = MODEL.dids[+b.dataset.i]; LAST = { type: 'did', v: d }; _renderDfBoxes(_dfKindsFor(d)); render(); };
         });
+        const _dfSync = () => {
+          const boxes = [...pickEl.querySelectorAll('[data-df]')];
+          const on = boxes.filter(b => b.checked).length;
+          const allBtn = pickEl.querySelector('[data-dfall]');
+          if (allBtn) allBtn.textContent = (on === boxes.length) ? 'Clear all' : 'Check all';
+          const warn = pickEl.querySelector('[data-dfwarn]');
+          if (warn) warn.style.display = (on === 0) ? '' : 'none';
+        };
+        pickEl.querySelectorAll('[data-df]').forEach(cb => {
+          cb.onchange = () => { DEST_FILTER[cb.dataset.df] = cb.checked; _dfSync(); if (LAST && LAST.type === 'did') render(); };
+        });
+        const _dfAll = pickEl.querySelector('[data-dfall]');
+        if (_dfAll) _dfAll.onclick = () => {
+          const boxes = [...pickEl.querySelectorAll('[data-df]')];
+          const target = boxes.some(b => !b.checked);   // any off -> Check all; else Clear all
+          boxes.forEach(b => { b.checked = target; DEST_FILTER[b.dataset.df] = target; });
+          _dfSync(); if (LAST && LAST.type === 'did') render();
+        };
+        /* which filterable destination kinds a given DID actually routes to */
+        function _dfKindsFor(d){
+          const s = new Set();
+          try { const r = traceDID(MODEL, d); (function scan(n){ s.add(n.kind); n.kids.forEach(scan); })(r.root); } catch (e) {}
+          return s;
+        }
+        /* rebuild the checkbox row to show only the kinds routed from this DID,
+           preserving each type's ticked state */
+        function _renderDfBoxes(kindsSet){
+          const el = pickEl.querySelector('[data-dfboxes]');
+          if (!el) return;
+          el.innerHTML = _FK.filter(([k]) => kindsSet.has(k)).map(([k,label]) => {
+            const sk = SKIN[k] || SKIN.leaf;
+            return '<label class="dfbox"><input type="checkbox" data-df="' + k + '"' + (DEST_FILTER[k] ? ' checked' : '') +
+                   '> <i class="dfsw" style="background:' + sk[0] + '; border-color:' + sk[2] + '"></i> ' + label + '</label>';
+          }).join('');
+          el.querySelectorAll('[data-df]').forEach(cb => {
+            cb.onchange = () => { DEST_FILTER[cb.dataset.df] = cb.checked; _dfSync(); if (LAST && LAST.type === 'did') render(); };
+          });
+          _dfSync();
+        }
       }
 
       const ivrs = Object.keys(MODEL.ivr).sort((a, b) => +a - +b);
@@ -2618,6 +2705,29 @@ function renderSVG(root, orient){
   }
 
   let CURRENT_SVG = '', CURRENT_TITLE = '';
+
+  /* Map-a-DID local-destination filter: hide unticked destination kinds and
+     drop any route that leads only to them. Visible dg/erg/q keep their whole
+     member/agent subtree; loop/ref/directory nodes are never filtered. The
+     root is never dropped, so an over-filtered map still shows the DID node. */
+  function filterDestTypes(root){
+    const TERMINAL = { ext:1, vm:1, dg:1, erg:1, q:1 };   // kept whole (incl. members) or dropped
+    function walk(node, parentKind){
+      if (TERMINAL[node.kind]) return DEST_FILTER[node.kind] ? node : null;
+      if (node.kind === 'ivr'){
+        if (parentKind === 'ivr' && !DEST_FILTER.ivr) return null;    // hide nested sub-menu; primary menu is kept
+        node.kids = node.kids.map(k => walk(k, 'ivr')).filter(Boolean);
+        return node;
+      }
+      node.kids = node.kids.map(k => walk(k, node.kind)).filter(Boolean);
+      return node;
+    }
+    root.kids = root.kids.map(k => walk(k, root.kind)).filter(Boolean);
+    (function prune(node){                                             // bottom-up: drop emptied IVR/OT nodes
+      node.kids = node.kids.filter(k => { prune(k); return !((k.kind === 'ivr' || k.kind === 'ot') && k.kids.length === 0); });
+    })(root);
+    return root;
+  }
 
   function render(){
     if (!LAST) return;
@@ -2706,6 +2816,8 @@ function renderSVG(root, orient){
       b.classList.toggle('offroute', !on);
       b.title = on ? 'On the active route' : 'Not on the active route';
     });
+
+    if (LAST.type === 'did') filterDestTypes(root);   // apply local-destination filter (Map a DID only)
 
     let leaves = 0;
     (function count(n){ if (!n.kids.length) leaves++; n.kids.forEach(count); })(root);
@@ -3704,14 +3816,12 @@ function renderSVG(root, orient){
       else if (htmlCount === 1){ ext = '.html'; mime = 'text/html';    desc = 'HTML page'; }
       else                     { ext = '.txt';  mime = 'text/plain';    desc = 'Text file'; }
     }
-    let name = opt.name || 'call_flow';
+    const name = (opt.name || 'call_flow').replace(/[\\/:*?"<>|]/g, '').trim() || 'call_flow';
     const target = await pickSave(name + ext, desc, mime, ext);   // <-- during the gesture
     if (target.mode === 'cancelled') return;
-    if (target.mode === 'legacy'){
-      const entered = prompt('Name your download:', name);
-      if (entered === null) return;
-      name = entered.replace(new RegExp('\\' + ext + '$', 'i'), '').replace(/[\\/:*?"<>|]/g, '').trim() || 'call_flow';
-    }
+    /* No name prompt on the legacy path: the file-name field was removed, so we
+       download with the automatic name. Prompting here could return null on an
+       offline file:// page and silently cancel the download. */
 
     const btn = document.getElementById('dlBtn');
     if (btn){ btn.textContent = 'Generating\u2026'; btn.disabled = true; }
@@ -3859,6 +3969,62 @@ UEsDBBQAAAAIAIIe7lxGx01IlQAAAM0AAAAQAAAAZG9jUHJvcHMvYXBwLnhtbE3PTQvCMAwG4L9SdreZ
 
 All notable changes to the call flow map. Dates are 2026-07-13 unless noted;
 the map was developed iteratively in a single working session.
+
+## [2.28.0] — 2026-07-21
+### Changed
+- A menu (IVR) reached from more than one place in the same map is now
+  expanded in full at each spot, so every branch is a complete map on its
+  own — e.g. an after-hours menu’s options now show their full sub-menus
+  instead of an “IVR N — shown above” pointer. Genuine loops (a menu that
+  routes back into itself or into a menu already on the path) are still
+  detected and drawn as a “Repeat” node, so maps stay finite.
+
+## [2.27.1] — 2026-07-21
+### Fixed
+- Destination labels that lead with a type word — e.g. “IVR - 192”,
+  “Voicemail - 110”, “Extension 101 - Desk 1” — are now parsed correctly.
+  Previously only a number at the very start of the label was read, so
+  those options were dropped or mislabelled (a common symptom was an
+  after-hours IVR showing a generic “Remote Access” node or missing a
+  branch entirely).
+- Resolution now honours an explicit type word in the label, so an option
+  and a voicemail that share the same number resolve to the intended one.
+- A Dial Group’s Last Destination is now added to the call flow and resolved
+  to its real type (IVR, extension, voicemail, …) instead of always being
+  drawn as a voicemail.
+- The Extension sheet is now read even when it has no header row (some
+  exports omit it); the first extension is no longer skipped.
+
+## [2.27.0] — 2026-07-21
+### Added
+- IVR is now one of the local-destination filter types in “Map a DID.”
+  Unticking it hides nested sub-menus (an IVR reached as an option from
+  another IVR) and any branch that leads only into them; the DID’s primary
+  menu is always kept.
+### Changed
+- The filter now shows only the destination types actually routed from the
+  selected DID. The checkbox row updates each time you pick a DID; each
+  type’s ticked/unticked state is remembered as you switch between DIDs.
+
+## [2.26.0] — 2026-07-21
+### Added
+- “Map a DID” now has a local-destination filter: a row of checkboxes
+  (Extension, Voicemail, Dial Group, ERG, Queue) under the heading, all
+  ticked by default. Unticking a type hides those endpoints in the DID map
+  and drops any route that leads only to them; a “Clear all / Check all”
+  button and a warning when nothing is selected round it out. Only the
+  destination types actually present in the workbook get a checkbox.
+  The filter applies to the Map-a-DID view only; other views and exports
+  are unaffected.
+
+## [2.25.1] — 2026-07-21
+### Fixed
+- Download could silently do nothing on offline (file://) pages and in
+  browsers without the Save-As picker (Firefox/Safari). The fallback path
+  asked for a file name with a prompt, and if that prompt was blocked or
+  dismissed the download was cancelled with no file and no notification.
+  The leftover name prompt (the File name field was removed in 2.25.0) is
+  gone; the fallback now downloads straight away using the automatic name.
 
 ## [2.25.0] — 2026-07-21
 ### Added
