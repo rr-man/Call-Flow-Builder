@@ -197,6 +197,9 @@
                   box-shadow: 0 0 8px 1px rgba(143,208,255,.6); }
   @keyframes bannerIn { from { transform: translateY(-100%); } to { transform: translateY(0); } }
   @keyframes pulseRun { to { transform: translateX(calc(100vw + 180px)); } }
+  .pnote { display:flex; align-items:flex-start; gap:8px; background:#eef5fb; border:1px solid #cfe0ef; border-left:3px solid #2980b9; border-radius:8px; padding:9px 11px; font-size:12.5px; color:#22536f; margin:0 0 12px; }
+  .orb.attn { background:#f0a020; color:#fff; border-color:#d98c10; animation: attnPulse 1.6s ease-in-out infinite; }
+  @keyframes attnPulse { 0%,100% { box-shadow:0 0 0 0 rgba(240,160,32,.55); } 50% { box-shadow:0 0 0 7px rgba(240,160,32,0); } }
 
   .an { opacity: 0; animation: fadeUp .55s ease-out both; }
   .an1 { animation-delay: .30s; } .an2 { animation-delay: .42s; }
@@ -434,7 +437,7 @@
     <span>DID → Operation Times gates → local destinations</span>
   </div>
   <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-    <div class="home" onclick="showLog()" title="View the changelog">v2.39.0</div>
+    <div class="home" onclick="showLog()" title="View the changelog">v2.41.0</div>
     <div class="home" id="themeBtn" onclick="toggleTheme()">Dark mode</div>
     <div class="home" id="homeBtn" onclick="show('landing')" style="display:none">← Home</div>
   </div>
@@ -1346,15 +1349,21 @@
 
   <div class="hint" style="margin:10px 2px 0">
     Or start from a sample workbook:
-    <div style="display:flex;gap:8px;align-items:flex-start;margin:6px 0 0">
-      <span>&#8681;</span>
-      <div><a href="#" id="sampleDl" style="color:#2980b9;font-weight:600">Property Management (Demo)</a>
+    <div style="display:flex;gap:10px;align-items:flex-start;margin:8px 0 0">
+      <span style="color:#2980b9">&#8681;</span>
+      <div style="flex:1"><div style="color:#1c2b3a;font-weight:600">Property Management (Demo)</div>
       <div style="color:#6b7a89;font-size:12px">General demo &mdash; DIDs to IVR, dial group, queue, conference, extension and agents; nested IVRs and Operation Times. All ten tabs with example rows.</div></div>
+      <div style="display:flex;gap:9px;align-items:center;white-space:nowrap">
+        <button type="button" id="sampleAttach" style="background:#2980b9;color:#fff;border:0;border-radius:7px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer">Attach</button>
+        <a href="#" id="sampleDl" style="color:#6b7a89;font-size:12px">Download</a></div>
     </div>
-    <div style="display:flex;gap:8px;align-items:flex-start;margin:6px 0 0">
-      <span>&#8681;</span>
-      <div><a href="#" id="sampleDl2" style="color:#2980b9;font-weight:600">Office Dental (Demo)</a>
+    <div style="display:flex;gap:10px;align-items:flex-start;margin:8px 0 0">
+      <span style="color:#2980b9">&#8681;</span>
+      <div style="flex:1"><div style="color:#1c2b3a;font-weight:600">Office Dental (Demo)</div>
       <div style="color:#6b7a89;font-size:12px">Per-day Operation Times &mdash; a different open-hours destination for each weekday, closed otherwise.</div></div>
+      <div style="display:flex;gap:9px;align-items:center;white-space:nowrap">
+        <button type="button" id="sampleAttach2" style="background:#2980b9;color:#fff;border:0;border-radius:7px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer">Attach</button>
+        <a href="#" id="sampleDl2" style="color:#6b7a89;font-size:12px">Download</a></div>
     </div>
   </div>
 
@@ -1884,6 +1893,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   }
   var _txLoaded = false;
   function openTx() {
+    var _b = document.getElementById('txBtn'); if (_b) _b.classList.remove('attn');
     var modal = document.getElementById('txModal'), frame = document.getElementById('txFrame');
     if (!_txLoaded) {
       try { frame.srcdoc = _txDecodeB64(document.getElementById('txsrc').textContent); _txLoaded = true; }
@@ -2697,7 +2707,7 @@ function renderSVG(root, orient){
 
       statusEl.innerHTML = '<h2 class="secname">Summary</h2>' +
         '<div class="panel"><div class="maphd"><h3 style="margin:0">' + file.name + '</h3>' +
-        '<div class="dlActions"><button class="orb big on" id="dlBtn" onclick="downloadMaps()">&#8681; Download\u2026</button><button class="orb big" onclick="openTx()">&#127908; Transcribe audio</button><button class="orb big" onclick="clearFile()">&#10005; Clear file</button></div></div><p class="hint" style="margin-top:8px">' +
+        '<div class="dlActions"><button class="orb big on" id="dlBtn" onclick="downloadMaps()">&#8681; Download\u2026</button><button class="orb big attn" id="txBtn" onclick="openTx()">&#127908; Transcribe audio</button><button class="orb big" onclick="clearFile()">&#10005; Clear file</button></div></div><p class="hint" style="margin-top:8px">' +
         MODEL.dids.length + ' DIDs &middot; ' + Object.keys(MODEL.ivr).length + ' IVRs &middot; ' +
         Object.keys(MODEL.dg).length + ' dial groups &middot; ' + Object.keys(MODEL.erg).length + ' ERGs &middot; ' +
         Object.keys(MODEL.ext).length + ' extensions</p></div>';
@@ -2769,7 +2779,9 @@ function renderSVG(root, orient){
           '</div>';
         }
         let h = '<div class="panel"><h3 class="ptog">Map a DID<span class="cvt">&#9662;</span></h3>' +
-                '<div class="pbody"><p class="hint">The full journey: DID &rarr; IVR &rarr; every option &rarr; terminating destination.</p>' + _filterRow + '<div data-didlist></div></div></div>';
+                '<div class="pbody">' +
+                  '<div class="pnote"><span style="font-weight:700">&#9755;</span><div>Select a call route \u2014 choose <b>one DID</b> from the options below to trace it.<span class="tip" tabindex="0" data-tip="Each DID is a dialled number. Pick one to trace its call route \u2014 the full path from the DID through Operation Times gates, IVRs and every option to each terminating destination.">i</span></div></div>' +
+                  '<p class="hint">The full journey: DID &rarr; IVR &rarr; every option &rarr; terminating destination.</p>' + _filterRow + '<div data-didlist></div></div></div>';
         pickEl.innerHTML = h;
         const _listEl = pickEl.querySelector('[data-didlist]');
         /* the checkboxes decide which DIDs appear here, by routing type */
@@ -3409,6 +3421,19 @@ function renderSVG(root, orient){
   }
   var _sdl = document.getElementById('sampleDl');  if (_sdl)  _sdl.onclick  = e => { e.preventDefault(); downloadSample('lakeside'); };
   var _sdl2 = document.getElementById('sampleDl2'); if (_sdl2) _sdl2.onclick = e => { e.preventDefault(); downloadSample('office'); };
+
+  /* attach a sample: decode the embedded workbook and stage it exactly like an upload */
+  function attachSample(which){
+    const cfg = which === 'office'
+      ? { id: 'samplesrc2', file: 'sample_call_map_office_dental.xlsx' }
+      : { id: 'samplesrc',  file: 'sample_call_map.xlsx' };
+    const el = document.getElementById(cfg.id); if (!el) return;
+    const bin = atob(el.textContent.trim()), u8 = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    stage(new File([u8], cfg.file, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+  }
+  var _sa  = document.getElementById('sampleAttach');  if (_sa)  _sa.onclick  = e => { e.preventDefault(); attachSample('lakeside'); };
+  var _sa2 = document.getElementById('sampleAttach2'); if (_sa2) _sa2.onclick = e => { e.preventDefault(); attachSample('office'); };
 
   /* ── full PDF report: one call map per DID ── */
 
@@ -4172,6 +4197,21 @@ UEsDBBQAAAAIAFqU91xGx01IlQAAAM0AAAAQAAAAZG9jUHJvcHMvYXBwLnhtbE3PTQvCMAwG4L9SdreZ
 
 All notable changes to the call flow map. Dates are 2026-07-13 unless noted;
 the map was developed iteratively in a single working session.
+
+## [2.41.0] — 2026-07-23
+### Added
+- Map a DID now opens with a blue notification prompting the user to select a
+  call route — “choose one DID from the options below to trace it” — with an
+  info tooltip explaining what a call route is.
+- After a call flow map is generated, the “Transcribe audio” button pulses amber
+  to signal it's the next step; the highlight clears once it's opened.
+
+## [2.40.0] — 2026-07-23
+### Added
+- “Attach” button on each sample workbook in the upload view: it decodes the
+  embedded sample and loads it straight into the tool through the same path as
+  a dropped file — no download or re-upload needed. “Download” is still there
+  for anyone who wants the .xlsx itself.
 
 ## [2.39.0] — 2026-07-23
 ### Changed
