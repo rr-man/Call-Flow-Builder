@@ -437,7 +437,7 @@
     <span>DID → Operation Times gates → local destinations</span>
   </div>
   <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-    <div class="home" onclick="showLog()" title="View the changelog">v2.42.2</div>
+    <div class="home" onclick="showLog()" title="View the changelog">v2.42.3</div>
     <div class="home" id="themeBtn" onclick="toggleTheme()">Dark mode</div>
     <div class="home" id="homeBtn" onclick="show('landing')" style="display:none">← Home</div>
   </div>
@@ -3481,8 +3481,30 @@ function renderSVG(root, orient){
     const blob = new Blob([u8], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     await writeSave(target, blob, cfg.file);
   }
-  var _sdl = document.getElementById('sampleDl');  if (_sdl)  _sdl.onclick  = e => { e.preventDefault(); downloadSample('lakeside'); };
-  var _sdl2 = document.getElementById('sampleDl2'); if (_sdl2) _sdl2.onclick = e => { e.preventDefault(); downloadSample('office'); };
+  /* Sample Download links.
+     Standalone: keep the native Save dialog (downloadSample -> showSaveFilePicker).
+     Embedded (iframe): the picker is blocked and a scripted / new-tab download
+     fails (the blob belongs to the iframe's context), so make the link a REAL
+     download link the user clicks directly — the blob stays in-context and the
+     click is a genuine user gesture, which browsers allow from a normal iframe. */
+  function _wireSampleLink(a, which){
+    if (!a) return;
+    var emb = false; try { emb = (window.self !== window.top); } catch (e) { emb = true; }
+    if (!emb){ a.onclick = function(e){ e.preventDefault(); downloadSample(which === 'office' ? 'office' : 'lakeside'); }; return; }
+    var cfg = which === 'office'
+      ? { id: 'samplesrc2', file: 'sample_call_map_office_dental.xlsx' }
+      : { id: 'samplesrc',  file: 'sample_call_map.xlsx' };
+    try {
+      var el = document.getElementById(cfg.id); if (!el) return;
+      var bin = atob(el.textContent.trim()), u8 = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+      var url = URL.createObjectURL(new Blob([u8], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+      a.href = url; a.setAttribute('download', cfg.file); a.target = '_blank'; a.rel = 'noopener';
+      a.onclick = null;
+    } catch (e) {}
+  }
+  _wireSampleLink(document.getElementById('sampleDl'),  'lakeside');
+  _wireSampleLink(document.getElementById('sampleDl2'), 'office');
 
   /* attach a sample: decode the embedded workbook and stage it exactly like an upload */
   function attachSample(which){
@@ -4262,6 +4284,15 @@ UEsDBBQAAAAIAFqU91xGx01IlQAAAM0AAAAQAAAAZG9jUHJvcHMvYXBwLnhtbE3PTQvCMAwG4L9SdreZ
 
 All notable changes to the call flow map. Dates are 2026-07-13 unless noted;
 the map was developed iteratively in a single working session.
+
+## [2.42.3] — 2026-07-23
+### Fixed
+- Sample-workbook Download now works inside an iframe. The new-tab approach
+  failed because the file (a blob) belongs to the iframe's context and a
+  separate tab can't read it. When embedded, each sample Download link is now a
+  real download link the user clicks directly — the file stays in-context and
+  the click is a genuine gesture the browser allows. Standalone still uses the
+  native Save dialog.
 
 ## [2.42.2] — 2026-07-23
 ### Fixed
