@@ -1,0 +1,76 @@
+---
+title: PBXware Call Flow Builder — how a flow is composed and where it goes
+---
+flowchart TB
+
+    start([New project]) --> name[/Name the project/]
+
+    name --> way{How do you<br/>want to start?}
+
+    way -->|From scratch| drag[Drag objects from<br/>the toolbox]
+    way -->|From data| imp[Drop a CSV in the<br/>Upload panel]
+    way -->|Carry on| open[Open a saved<br/>.json project]
+    way -->|Look around| samp[Load the<br/>sample flow]
+
+    subgraph compose [Compose on the canvas]
+        direction TB
+        drag --> place[Place DIDs, IVRs, groups,<br/>queues, ERGs, endpoints]
+        place --> wire[Drag a port dot onto<br/>a node to route it]
+        wire --> guard{Legal<br/>destination?}
+        guard -->|No| refuse[Refused. An agent is only<br/>ever reached from a queue]
+        refuse --> wire
+        guard -->|Yes| ot[Optional: put an<br/>Operation Times gate on it]
+    end
+
+    imp --> vet{Vetted on import}
+    vet -->|Target missing| pend[Kept as pending.<br/>Wires itself when built]
+    vet -->|Wrong type| drop[Route dropped<br/>and reported]
+    vet -->|Good| place
+    pend --> place
+    drop --> place
+
+    open --> place
+    samp --> place
+
+    ot --> doc[(One document<br/>DOC)]
+
+    doc --> check{{Findings run on<br/>every change}}
+    check -->|IVR with no timeout| fix[Fix in the Inspector]
+    check -->|Destination not built| fix
+    check -->|Loop, or nothing reaches it| fix
+    check -->|Nodes overlapping| tidy[Tidy these]
+    fix --> doc
+    tidy --> doc
+
+    check -->|Clean| out
+
+    subgraph out [Take it out of the tool]
+        direction LR
+        json[Save .json<br/>the project itself]
+        wb[Export .xlsx<br/>11 sheets, export layout]
+        png[Canvas .png<br/>per DID or whole flow]
+        tpl[Consolidated template<br/>to hand to provisioning]
+    end
+
+    wb --> mapper[[Call Flow Map Creator]]
+    mapper --> traced[Traced call map]
+    traced --> deliver[PDF · SVG · Visio<br/>for the customer or Confluence]
+
+    png --> deliver
+    json -.->|reopen later| open
+
+    classDef entry fill:#e4f5f7,stroke:#17a2b8,color:#0e5c68
+    classDef menu fill:#eafaf0,stroke:#27ae60,color:#1c5c3a
+    classDef queue fill:#eceff4,stroke:#607d8b,color:#37474f
+    classDef warn fill:#fff4e0,stroke:#e0a800,color:#8a6300
+    classDef bad fill:#fdecea,stroke:#c0392b,color:#c0392b
+    classDef good fill:#eafaf0,stroke:#27ae60,color:#1c5c3a
+    classDef store fill:#f3ecfa,stroke:#8e44ad,color:#6c3483
+
+    class start,name,way entry
+    class drag,place,wire,ot,samp,open menu
+    class imp,vet,pend queue
+    class check,fix,tidy warn
+    class refuse,drop bad
+    class doc store
+    class json,wb,png,tpl,mapper,traced,deliver good

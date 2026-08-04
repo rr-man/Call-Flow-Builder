@@ -1,0 +1,6 @@
+number,tenant,trunk,destination
+8005551000,Bridgeway,SIP-Main,5000
+8005551001,Bridgeway,SIP-Main,4001
+8005551002,Bridgeway,SIP-Main,3001
+8005551003,Bridgeway,SIP-Main,
+8005551004,Bridgeway,SIP-Backup,
