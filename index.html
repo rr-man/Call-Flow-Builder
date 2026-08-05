@@ -618,6 +618,19 @@ body.zen #expandBtn{background:var(--navy);border-color:var(--navy);color:#fff}
 #canvas.xray .cn-erg  {background:var(--xr-purple)}
 #canvas.xray .cn-ext  {background:var(--xr-blue)}
 #canvas.xray .cn-agent{background:var(--xr-mem)}
+#dlbox{
+  position:fixed;inset:0;z-index:330;display:none;
+  background:var(--overlay);padding:40px 24px;
+}
+#dlbox.show{display:block}
+#dlbox .pb-box{max-width:460px}
+.dl-rows{display:flex;flex-direction:column;gap:8px}
+.dl-rows .btn,.dl-rows a.btn{justify-content:center;text-align:center;text-decoration:none}
+.dl-rows small{font-weight:400;color:inherit;opacity:.75;margin-left:4px}
+.dl-url{
+  width:100%;margin-top:6px;padding:5px 8px;font:inherit;font-size:11px;
+  border:1px solid var(--line);border-radius:6px;background:var(--surface2);color:var(--ink);
+}
 #pngbox{
   position:fixed;inset:0;z-index:300;display:none;background:var(--overlay);
   align-items:center;justify-content:center;padding:24px;
@@ -822,7 +835,7 @@ body.zen #expandBtn{background:var(--navy);border-color:var(--navy);color:#fff}
 <div id="banner">
   <span class="brand"><img src="data:image/png;base64,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" alt="coeo" width="75" height="22"></span>
   <h1>PBXware Call Flow Builder</h1>
-  <button class="chip" id="verBtn" onclick="showLog()" title="View the changelog">v0.42.1</button>
+  <button class="chip" id="verBtn" onclick="showLog()" title="View the changelog">v0.44.0</button>
   <button class="vb on" data-v="canvas">Canvas</button><button class="vb" data-v="forms">Forms</button>
   <span class="spacer"></span>
   <input id="projName" class="pname" type="text" maxlength="80" placeholder="Untitled flow"
@@ -848,6 +861,8 @@ body.zen #expandBtn{background:var(--navy);border-color:var(--navy);color:#fff}
       <div class="mgrp">Canvas</div>
       <label class="vitem"><input type="checkbox" id="xrayChk">
         <span><b>See-through destinations</b><i>Wires stay visible behind node bodies.</i></span></label>
+      <label class="vitem"><input type="checkbox" id="autoFitChk" checked>
+        <span><b>Auto-fit the flow</b><i>Refit when the window, embed or panel changes size. Zooming by hand switches this off.</i></span></label>
       <div class="msep"></div>
       <div class="mgrp">Panel</div>
       <div class="vrow"><b>Position</b>
@@ -2196,12 +2211,125 @@ function safeName(s){
     .replace(/[_\-.]+$/, '');
   return out || 'call_flow';
 }
-function dl(blob, name){
+/* ── downloads, and the embed problem ─────────────────────────────────────
+   A sandboxed iframe (Confluence's macro) silently swallows programmatic
+   downloads: a.click() fires, nothing appears, no error. Nothing in-page can
+   override that \u2014 it is the sandbox working as designed. So framed, every
+   download opens a dialog of routes that survive it, ending with a hand-off
+   to the full tab that carries the project across. */
+function isEmbed(){
+  if (/[#?&]embed\b/.test(location.href)) return true;
+  try { return window.self !== window.top; } catch(e){ return true; }
+}
+
+function adoptProject(d){
+  if (!d || !d.meta || !Array.isArray(d.dids)) throw new Error('Not a builder project file.');
+  DOC = d;
+  ['ext','vm','conf','ivr','dg','erg','q','agents','ot','dids'].forEach(k => { DOC[k] = DOC[k] || []; });
+  Object.keys(TYPES).forEach(t => arr(t).forEach(o => { if (!o.id) o.id = uid(); }));
+  DOC.meta = DOC.meta || {};
+  if (typeof DOC.meta.notes !== 'string') DOC.meta.notes = '';
+  RAW = {}; LASTRES = {};
+  SEL = { type: 'did', id: DOC.dids.length ? DOC.dids[0].id : null };
+  $('docname').textContent = DOC.meta.name || 'Untitled flow';
+  refreshAll();
+  restorePanel();
+}
+
+function dlNow(blob, name){
   const u = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = u; a.download = name;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(u), 4000);
+}
+
+function dl(blob, name){
+  if (isEmbed()) return dlDialog(blob, name);
+  dlNow(blob, name);
+}
+
+/* the routes out of a frame, best first */
+function dlDialog(blob, name){
+  let m = $('dlbox');
+  if (!m){
+    m = document.createElement('div');
+    m.id = 'dlbox';
+    m.innerHTML =
+      '<div class="pb-box"><h3>Get the file out of the embed</h3>' +
+      '<p class="pb-note" style="margin:0 0 10px">This page is inside a frame, and the frame is allowed to ' +
+      'block silent downloads. These routes work instead, best first.</p>' +
+      '<div class="dl-rows">' +
+      '<a class="btn pri" id="dlLink" href="#" download>&#8681; Save <span id="dlName"></span></a>' +
+      '<button class="btn" id="dlTab">Open in a new tab</button>' +
+      '<button class="btn" id="dlCopy">Copy the contents</button>' +
+      '<button class="btn" id="dlFull">Open the full app &#8599; <small>your work carries over</small></button>' +
+      '</div>' +
+      '<p class="pb-note" id="dlMsg" style="margin:10px 0 0"></p>' +
+      '<div class="pb-acts"><span class="spacer"></span>' +
+      '<button class="btn" id="dlClose">Close</button></div></div>';
+    document.body.appendChild(m);
+    m.addEventListener('click', e => { if (e.target === m) dlDialogClose(); });
+    $('dlClose').addEventListener('click', dlDialogClose);
+    $('dlTab').addEventListener('click', () => {
+      const w = window.open(dlDialog._u, '_blank');
+      $('dlMsg').textContent = w
+        ? 'Opened. If the tab shows the file instead of saving it, use its own Save.'
+        : 'The frame also blocks new tabs here. Use "Open the full app" below, or ask for allow-popups on the embed.';
+    });
+    $('dlCopy').addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(await dlDialog._b.text());
+        $('dlMsg').textContent = 'Copied. Paste into a file with the right extension.';
+      } catch(e){ $('dlMsg').textContent = 'The clipboard is not available in this frame.'; }
+    });
+    $('dlFull').addEventListener('click', () => {
+      const base = location.href.replace(/[#?].*$/, '');
+      let u = '';
+      try { localStorage.setItem('cfb.handoff', JSON.stringify(DOC)); u = base + '#handoff'; }
+      catch(e){ /* storage blocked: carry the project in the URL itself */ }
+      if (!u){
+        const enc = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(DOC)))));
+        u = enc.length < 150000 ? base + '#p=' + enc : base;
+      }
+      const w = window.open(u, '_blank');
+      $('dlMsg').innerHTML = w
+        ? 'Opened in a full tab with this project loaded. Download from there \u2014 nothing blocks it.'
+        : 'New tabs are blocked too. Copy this address into one yourself: ' +
+          '<input class="dl-url" readonly value="' + esc(u) + '">';
+    });
+  }
+  dlDialog._b = blob;
+  if (dlDialog._u) URL.revokeObjectURL(dlDialog._u);
+  dlDialog._u = URL.createObjectURL(blob);
+  const a = $('dlLink');
+  a.href = dlDialog._u; a.setAttribute('download', name);
+  $('dlName').textContent = name;
+  /* text formats only: 'xml' alone would match inside 'openxmlformats' and
+     offer to paste a binary workbook through the clipboard */
+  const isText = /^text\/|^application\/json$|svg\+xml$/.test(blob.type || '');
+  $('dlCopy').style.display = isText ? '' : 'none';
+  $('dlMsg').textContent = '';
+  m.classList.add('show');
+}
+function dlDialogClose(){
+  const m = $('dlbox');
+  if (m) m.classList.remove('show');
+}
+
+/* arriving from the embed: adopt the carried project, then clean the URL */
+function restoreHandoff(){
+  const h = location.hash || '';
+  try {
+    if (h.indexOf('handoff') >= 0){
+      const t = localStorage.getItem('cfb.handoff');
+      if (t){ localStorage.removeItem('cfb.handoff'); adoptProject(JSON.parse(t)); cvFlash('Project carried over from the embed.'); }
+    } else if (h.indexOf('#p=') === 0){
+      adoptProject(JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(h.slice(3)))))));
+      cvFlash('Project carried over from the embed.');
+    } else return;
+    history.replaceState(null, '', location.pathname + location.search);
+  } catch(e){ /* a bad hash never breaks boot */ }
 }
 function saveJson(){ dl(new Blob([JSON.stringify(DOC, null, 2)], { type: 'application/json' }), safeName(DOC.meta.name) + '.json'); }
 function loadJson(){
@@ -2389,23 +2517,8 @@ function init(){
     const f = e.target.files[0]; if (!f) return;
     const r = new FileReader();
     r.onload = () => {
-      try {
-        const d = JSON.parse(r.result);
-        if (!d || !d.meta || !Array.isArray(d.dids)) throw new Error('Not a builder project file.');
-        DOC = d;
-        ['ext','vm','ivr','dg','erg','q','agents','ot','dids'].forEach(k => { DOC[k] = DOC[k] || []; });
-        DOC[TYPES[SEL.type].key].forEach(o => { if (!o.id) o.id = uid(); });
-        Object.keys(TYPES).forEach(t => arr(t).forEach(o => { if (!o.id) o.id = uid(); }));
-        DOC.meta = DOC.meta || {};
-        if (typeof DOC.meta.notes !== 'string') DOC.meta.notes = '';
-        RAW = {}; LASTRES = {};
-        SEL = { type: 'did', id: DOC.dids.length ? DOC.dids[0].id : null };
-        $('docname').textContent = DOC.meta.name || 'Untitled flow';
-        refreshAll();
-        restorePanel();
-      } catch (err){
-        cvFlash('Could not open that file: ' + err.message, true);
-      }
+      try { adoptProject(JSON.parse(r.result)); }
+      catch (err){ cvFlash('Could not open that file: ' + err.message, true); }
       e.target.value = '';
     };
     r.readAsText(f);
@@ -2620,10 +2733,14 @@ function computeViewSet(){
 const viewFilters = () => CVIEW.tab !== 'all' && CVIEW.mode === 'filter';
 
 function setView2(tab, mode){
+  const was = CVIEW.tab;
   if (tab != null) CVIEW.tab = tab;
   if (mode != null) CVIEW.mode = mode;
   if (DOC && DOC.meta) DOC.meta.view = { tab: CVIEW.tab, mode: CVIEW.mode };
   drawCanvas();
+  /* a different tab shows a different set of nodes, so it gets its own fit;
+     Focus/Filter on the same tab shows the same extent and does not */
+  if (CVIEW.tab !== was) autoFitNow('tab');
 }
 
 function drawViewTabs(){
@@ -2657,7 +2774,7 @@ function drawViewTabs(){
 
 /* fit what is in view into the viewport: pick a zoom that contains it, then
    scroll to it. Still never moves a node. */
-function fitView(){
+function fitView(quiet){
   const sc = $('cvscroll');
   if (!sc) return;
   let x1 = 1e9, y1 = 1e9, x2 = -1e9, y2 = -1e9, any = false;
@@ -2673,10 +2790,55 @@ function fitView(){
   const pad = 28;
   const w = (x2 - x1) + pad * 2, h = (y2 - y1) + pad * 2;
   const vw = sc.clientWidth || w, vh = sc.clientHeight || h;
-  setZoom(Math.min(1, vw / w, vh / h));
+  /* small flows may scale up, but only to 175% \u2014 three nodes at 200% on a
+     monitor reads as a mistake, not a fit */
+  setZoom(Math.min(1.75, vw / w, vh / h), quiet);
   sc.scrollLeft = Math.max(0, (x1 - pad) * ZOOM);
   sc.scrollTop  = Math.max(0, (y1 - pad) * ZOOM);
-  cvFlash('Fitted this view at ' + Math.round(ZOOM * 100) + '%. Nothing was moved.');
+  if (!quiet) cvFlash('Fitted this view at ' + Math.round(ZOOM * 100) + '%. Nothing was moved.');
+}
+
+/* ── auto-fit ─────────────────────────────────────────────────────────────
+   The workspace rescales itself when its space changes: the window or the
+   Confluence iframe resizes, the panel folds or swaps sides, Expand toggles,
+   a different DID tab is shown. Deliberate zooming means the person has taken
+   over, so any manual zoom suspends it \u2014 visibly, by unticking the menu item
+   \u2014 until it is ticked again. */
+let AUTOFIT = true;
+let _afT = null, _afLast = '';
+
+function autoFitNow(reason){
+  if (!AUTOFIT || !CVMODE) return;
+  fitView(true);
+}
+function autoFitSoon(){
+  if (!AUTOFIT) return;
+  clearTimeout(_afT);
+  _afT = setTimeout(() => {
+    const sc = $('cvscroll');
+    if (!sc) return;
+    const sig = sc.clientWidth + 'x' + sc.clientHeight;
+    if (sig === _afLast) return;             /* a resize that changed nothing */
+    _afLast = sig;
+    autoFitNow('resize');
+  }, 140);
+}
+function setAutoFit(on, fromUser){
+  AUTOFIT = !!on;
+  const c = $('autoFitChk');
+  if (c) c.checked = AUTOFIT;
+  if (DOC && DOC.meta) DOC.meta.autofit = AUTOFIT;
+  if (AUTOFIT) autoFitNow('enabled');
+  else if (fromUser) cvFlash('Auto-fit off. Fit still works on demand.');
+}
+function watchViewport(){
+  const sc = $('cvscroll');
+  if (!sc) return;
+  if (typeof ResizeObserver === 'function'){
+    new ResizeObserver(autoFitSoon).observe(sc);
+  } else {
+    window.addEventListener('resize', autoFitSoon);
+  }
 }
 
 /* ── drawing ─────────────────────────────────────────────────────────────
@@ -2893,6 +3055,12 @@ let ZOOM = 1;
    know that a transform is involved */
 const unz = v => v / ZOOM;
 
+function userZoom(z){
+  const took = AUTOFIT;
+  if (took) setAutoFit(false);
+  setZoom(z);
+  return took;                     /* so the caller can say so in one flash */
+}
 function setZoom(z, quiet){
   ZOOM = Math.min(ZMAX, Math.max(ZMIN, Math.round(z * 100) / 100));
   const cv = $('canvas');
@@ -4177,6 +4345,7 @@ function initCanvas(){
 
   document.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;
+    if ($('dlbox') && $('dlbox').classList.contains('show')){ dlDialogClose(); return; }
     if ($('logmodal') && $('logmodal').classList.contains('show')){ hideLog(); return; }
     if ($('viewMenu') && $('viewMenu').classList.contains('show')){ $('viewMenu').classList.remove('show'); return; }
     if ($('pngbox') && $('pngbox').classList.contains('show')){ $('pngbox').classList.remove('show'); return; }
@@ -4296,9 +4465,9 @@ function initCanvas(){
     const z = e.target.closest('[data-zoom]');
     if (!z) return;
     const a = z.getAttribute('data-zoom');
-    if (a === 'reset') setZoom(1);
-    else setZoom(ZOOM + (a === 'in' ? 0.1 : -0.1));
-    cvFlash('Zoom ' + Math.round(ZOOM * 100) + '%.');
+    const took = (a === 'reset') ? userZoom(1)
+                                 : userZoom(ZOOM + (a === 'in' ? 0.1 : -0.1));
+    cvFlash('Zoom ' + Math.round(ZOOM * 100) + '%.' + (took ? ' Auto-fit off.' : ''));
   });
 
   /* ctrl or cmd with the wheel zooms about the pointer, which is what every
@@ -4310,7 +4479,7 @@ function initCanvas(){
     const px = e.clientX - r.left, py = e.clientY - r.top;
     const cx = sc.scrollLeft + px, cy = sc.scrollTop + py;
     const before = ZOOM;
-    setZoom(ZOOM * (e.deltaY < 0 ? 1.1 : 1 / 1.1));
+    userZoom(ZOOM * (e.deltaY < 0 ? 1.1 : 1 / 1.1));
     const k = ZOOM / before;
     sc.scrollLeft = cx * k - px;
     sc.scrollTop  = cy * k - py;
@@ -4329,6 +4498,7 @@ function initCanvas(){
     if (!a) return;
     const dir = a.getAttribute('data-align');
     autoArrange(dir);
+    autoFitNow('align');
     cvFlash(dir === 'v' ? 'Aligned top to bottom by call depth.'
                         : 'Aligned left to right by call depth.');
   });
@@ -4353,6 +4523,7 @@ function initCanvas(){
     cvFlash('Panel moved to the ' + PSIDE + '.');
   });
   vm.addEventListener('change', e => {
+    if (e.target.id === 'autoFitChk'){ setAutoFit(e.target.checked, true); return; }
     const g = e.target.getAttribute('data-guard');
     if (g){
       GUARD[g] = e.target.checked;
@@ -4637,6 +4808,7 @@ function setPanelTab(t, keepRail){
 
 let PSIDE = 'left';
 
+function setPanelSideAF(){ autoFitSoon(); }
 function setPanelSide(side){
   PSIDE = (side === 'left') ? 'left' : 'right';
   const g = $('cvgrid');
@@ -4647,6 +4819,7 @@ function setPanelSide(side){
     b.classList.toggle('on', b.getAttribute('data-side') === PSIDE));
   if (DOC && DOC.meta) DOC.meta.panel = Object.assign({}, DOC.meta.panel, { side: PSIDE });
   drawWires();
+  autoFitSoon();
 }
 
 function setPanelRail(on){
@@ -4786,6 +4959,7 @@ function restorePanel(){
   setZoom(typeof v.zoom === 'number' ? v.zoom : 1, true);
   if (CVIEW.tab !== 'all' && CVIEW.tab !== 'unrouted' && !DOC.dids.some(d => d.nr === CVIEW.tab))
     CVIEW.tab = 'all';
+  setAutoFit(!DOC.meta || DOC.meta.autofit !== false);
   const q = (DOC.meta && DOC.meta.panel) || {};
   setPanelSide(q.side === 'right' ? 'right' : 'left');
   setPanelTab(q.tab && q.tab !== 'ai' ? q.tab : 'up');
@@ -4824,6 +4998,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initCanvas();
   initPanel();
   restorePanel();
+  restoreHandoff();
+  watchViewport();
   document.querySelectorAll('.vb').forEach(b =>
     b.addEventListener('click', () => setView(b.getAttribute('data-v'))));
   setView('canvas');
@@ -4835,6 +5011,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
 Versions below cover the work recorded in this build; entries before 0.22 were
 not kept in-app and are not reconstructed here.
+
+## [0.44.0]
+### Added
+- **Auto-fit.** The workspace now rescales itself to the space it has: resize
+  the window or the Confluence iframe, fold or move the panel, toggle Expand,
+  or switch DID tab, and the flow refits \u2014 up to 175%, so a small flow on a
+  large screen does not balloon. Zooming by hand is a takeover and switches it
+  off, visibly, in the View menu; ticking it back on or pressing Fit resumes.
+  The choice is saved with the project.
+
+## [0.43.0]
+### Added
+- Downloads now work from inside an embed. A sandboxed iframe (Confluence's
+  macro) is allowed to swallow programmatic downloads silently, and nothing in
+  the page can override that. Framed, every download now opens a dialog of
+  routes that survive it: a direct save link, open in a new tab, copy the
+  contents for text formats, and **Open the full app**, which hands the whole
+  project to a top-level tab \u2014 via storage when available, in the URL itself
+  when not \u2014 where nothing blocks the save.
+### Changed
+- Project adoption is one function shared by Open, the embed hand-off and the
+  URL restore, so all three normalise a file the same way.
 
 ## [0.42.1]\n### Fixed\n- `safeName` left non-ASCII characters in filenames, so a project called\n  "Bridgeway Dental \u2014 main line" produced a file with an em dash in its name.\n  The download attribute is handed straight to the operating system, and a name\n  it will not accept fails silently. Names are now normalised to ASCII, with\n  dashes folded to hyphens, and a name that reduces to nothing falls back to\n  `call_flow` instead of to a bare separator.\n\n## [0.42.0]
 ### Added
