@@ -1,6 +1,6 @@
 # PBXware — Call Flow Builder
 
-**Version:** 0.42.0 · 2026-08-04 (version chip in the HTML banner opens the changelog; coeo logo in the banner)
+**Version:** 0.57.0 · 2026-08-04 (version chip in the HTML banner opens the changelog; coeo logo in the banner)
 
 A single-file, self-contained tool for **composing** a PBXware call flow rather
 than reading one. The Call Flow Map Creator takes a configuration export and
@@ -24,7 +24,9 @@ it from CSV, and the tool writes the workbook the Map Creator reads.
 **Compose.** Drag DIDs, IVRs, dial groups, queues, ERGs, extensions, mailboxes,
 conferences and agents onto a canvas, then route them by dragging a port dot
 onto a target. An IVR shows a row per key with the timeout always visible,
-because a missing timeout is the most common misconfiguration.
+because a missing timeout is the most common misconfiguration. IVRs, ring
+groups and queues also carry a standing **Closed** port: wiring it creates the
+after-hours gate itself.
 
 **Import.** Drop a `.csv` for any object type, or straight onto the canvas.
 Destinations that do not exist yet are kept as pending and wire themselves the
@@ -51,11 +53,24 @@ The tool works inside an `<iframe>` (Confluence's iframe / HTML macro, a wiki, a
 portal). Two things behave differently when framed, both by the browser rather
 than by choice:
 
-- **Downloads are restricted.** Use **Copy canvas image** for the diagram; it
-  puts a PNG straight on the clipboard, which does work.
+- **Silent downloads are blocked by the frame's sandbox.** So when framed, every
+  download opens a small dialog of routes that survive it, best first: a direct
+  save link, open in a new tab, copy the contents (text formats), and **Open the
+  full app**, which opens the tool in its own tab **with the current project
+  carried over** — via browser storage when available, encoded in the URL when
+  not — where nothing blocks the save. **Copy canvas image** also works framed,
+  for the diagram itself.
 - **Native dialogs are suppressed.** Every confirmation in the app is drawn
   in-page for this reason. If you see a stock browser dialog anywhere, that is a
   bug.
+
+If you control the embed, the cleaner fix is to allow it at the source. On a raw
+iframe, add:
+
+    <iframe src="…" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups">
+
+Confluence's own macros set their sandbox themselves; where that cannot be
+changed, the in-app routes above are the answer.
 
 ## Interface notes
 
@@ -67,6 +82,40 @@ than by choice:
   image.
 - **Zoom** — 40% to 200%, or Ctrl/Cmd with the wheel about the pointer. **Fit**
   scales and scrolls to whatever the current tab shows.
+- **Destinations** — how much a DID or an IVR says about where its routes go:
+  nothing, number only, **number and name (default)**, or full detail. A DID
+  places it on its routes-to and closed rows; an IVR on its key rows, widening
+  from 120px to 150px or 230px as the step needs. Horizontal IVR keys are 34px
+  columns, so they take the colour and no text. Full detail adds a summary
+  block. This drives every port row on every type — a dial group reads
+  `rings Extension 1001 Reception desk`, and a queue's timeout and after-hours
+  row name what they reach. On a DID, IVR, dial group, queue or ring group,
+  **S** gives the number-only view and **i** full detail for that node alone;
+  clicking a lit button follows the menu again.
+- **Destination colour** — how a destination's own colour appears on the node:
+  none, **tinted (default)**, left stripe, or a swatch. **Colour the wires** is a
+  separate toggle, on by default. Note the palette holds six colours for nine
+  types — `ivr`, `dg` and `vm` share a green — so colour is a hint and the label
+  stays precise. After-hours wires keep their amber either way.
+- **Routing view** — a checkbox per routing type (IVR, dial group, queue, ERG,
+  voicemail, conference, agent) controlling what the canvas draws. DIDs and
+  extensions are always shown: they are the two ends of every route. Hidden
+  types are removed rather than faded, nothing moves, and a chip on the canvas
+  says how many are hidden. A type the flow has none of is greyed out and reads
+  *none* rather than being unticked, so the list shows what the flow contains
+  without claiming anything is hidden; a switch turns that off. It changes the
+  picture only — the export, the findings and the traced map still see
+  everything.
+- **Inspector fields** — one field per row with the label beside it (default),
+  or two across. At 340px, three across left 78px of text room and truncated
+  both a phone model and an email address.
+- **SMS marker** — how a DID says it takes SMS: not shown, a pill in the
+  subtitle, **its own row (default)**, or an edge stripe with a header badge.
+  Only the row costs height. Note SMS travels in the project file and the CSV,
+  not the workbook — a real DID routing sheet has no column for it.
+- **Auto-fit** — on by default: the flow rescales itself (up to 175%) when the
+  window or embed resizes, the panel folds or moves, Expand toggles, or the DID
+  tab changes. Zooming by hand switches it off, visibly, in the View menu.
 - **Align** — lays every node out by call depth, horizontally or vertically.
   Never changes routing.
 - **Canvas tabs** — All, one per DID, and Unrouted. **Focus** dims what the
