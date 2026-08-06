@@ -553,7 +553,10 @@ body.zen #expandBtn{background:var(--navy);border-color:var(--navy);color:#fff}
 .cn-agent{background:var(--mem-l);   border-color:var(--mem);    color:var(--mem-d)}
 
 
-.ivrctl{display:flex;gap:4px;padding:2px 11px 8px;align-items:center}
+/* five buttons in a strip that was sized for three: at 120px they escaped the
+   node. Wrapping is the guarantee \u2014 it holds at any width, zoom or font \u2014 and
+   the tighter gap and padding keep the common cases on one line. */
+.ivrctl{display:flex;flex-wrap:wrap;gap:3px;padding:2px 9px 8px;align-items:center}
 .seg{
   border:1px solid var(--line);border-radius:5px;padding:1px 7px;font-size:10.5px;
   font-weight:700;color:var(--mem-d);cursor:pointer;background:var(--surface);line-height:1.5;
@@ -618,6 +621,117 @@ body.zen #expandBtn{background:var(--navy);border-color:var(--navy);color:#fff}
 #canvas.xray .cn-erg  {background:var(--xr-purple)}
 #canvas.xray .cn-ext  {background:var(--xr-blue)}
 #canvas.xray .cn-agent{background:var(--xr-mem)}
+/* what a DID says about its destination */
+.cnd{
+  display:flex;align-items:center;gap:5px;margin:5px 8px 0;padding:4px 7px;
+  border-radius:6px;background:var(--surface);border:1px solid var(--line);
+  font-size:10.5px;color:var(--ink);
+}
+.cnd .ar{color:var(--faint);font-weight:700;flex:none}
+.cnd b{font-weight:700;flex:none}
+.cnd .nm{color:var(--mute);font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cnd.oth{background:var(--amber-l);border-color:var(--amber);color:var(--amber-d)}
+.cnd.bad{background:var(--red-l);border-color:var(--red);color:var(--red-d)}
+.cnadv{margin:5px 8px 0;border-top:1px dashed var(--line2);padding-top:5px}
+.cnadv .r{display:flex;gap:6px;font-size:10px;line-height:1.7}
+.cnadv .k{color:var(--faint2);min-width:62px;flex:none}
+.cnadv .v{color:var(--ink);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cnadv .v.bad{color:var(--red-d)}
+.pr .pn.bad{color:var(--red-d);font-weight:600}
+/* SMS is a property of the number, not a route \u2014 so it gets a marker of its
+   own rather than a port row, in the DID family teal so it cannot be mistaken
+   for an Operation Times gate or for something broken. */
+/* ── Inspector field layout ───────────────────────────────────────────────
+   Two shapes over the same markup. Only .fg.one is touched \u2014 pick lists, the
+   IVR key grid and checkboxes keep their own arrangements. */
+.lay-rows .grid2,
+.lay-rows .grid3{display:block}
+.lay-rows .fg.one{display:flex;align-items:center;gap:9px;margin-bottom:8px}
+.lay-rows .fg.one > label{
+  flex:none;width:104px;margin:0;line-height:1.3;
+}
+.lay-rows .fg.one > input,
+.lay-rows .fg.one > select{flex:1;min-width:0}
+/* two across: the three-column rows drop to two, labels stay above */
+.lay-grid .grid3{grid-template-columns:1fr 1fr}
+@media (max-width:520px){
+  .lay-rows .fg.one{display:block}
+  .lay-rows .fg.one > label{width:auto;margin-bottom:4px}
+}
+/* a fixed set of values, two across */
+/* routing view */
+.rvhead{display:flex;align-items:center;gap:10px;padding:2px 10px 6px}
+.rvhead .lnk{font-size:11px;color:var(--accent-txt);text-decoration:underline;cursor:pointer}
+.rvhead .spacer{flex:1}
+.rvhead .n{font-size:11px;color:var(--faint2)}
+.rv{display:flex;align-items:center;gap:8px;padding:5px 10px;border-radius:7px;cursor:pointer}
+.rv:hover{background:var(--hover)}
+.rv input{width:auto;margin:0;flex:none}
+.rv .sw{width:11px;height:11px;border-radius:3px;border:1.5px solid;flex:none}
+.rv b{font-size:12.5px;font-weight:600;color:var(--ink);flex:1}
+.rv .n{font-size:11px;color:var(--faint2)}
+.rv.off b{color:var(--faint)}
+.rv.mt{opacity:.45;cursor:default}
+.rv.mt b{color:var(--faint);font-weight:400}
+.rv.mt .n{font-style:italic}
+.rv.mt:hover{background:transparent}
+.rv.orphan b:after{content:' \2014 nothing to hang from';font-weight:400;color:var(--amber-d);font-size:11px}
+.fchip.hid{background:var(--slate-l);color:var(--slate-d);border-color:var(--slate)}
+#wires .w.stub{opacity:.35;stroke-dasharray:3 3}
+.fg.wide > label{display:flex;align-items:baseline;gap:6px}
+.fg.wide > label .n{font-weight:400;text-transform:none;letter-spacing:0;color:var(--ok-txt)}
+.fg.wide > label .n.none{color:var(--faint)}
+.ck2{
+  display:grid;grid-template-columns:1fr 1fr;gap:2px 10px;
+  border:1px solid var(--line);border-radius:8px;padding:7px 9px;background:var(--surface);
+}
+.ck2 label{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink);cursor:pointer}
+.ck2 label:hover{color:var(--accent-txt)}
+.ck2 label.odd span{color:var(--mute);font-style:italic}
+.ck2 input{width:auto;margin:0;flex:none}
+/* it is a block, so the row layout must not try to sit it beside its label */
+.lay-rows .fg.wide{display:block}
+.lay-rows .fg.wide > label{width:auto;margin-bottom:5px}
+.smsChip{
+  background:var(--did);color:#fff;font-size:9px;font-weight:700;letter-spacing:.5px;
+  border-radius:20px;padding:1px 6px;margin-left:5px;
+}
+.smsHdr{
+  background:rgba(255,255,255,.85);color:var(--did-d);border:1px solid var(--did);
+  font-size:8.5px;font-weight:700;letter-spacing:.5px;border-radius:4px;padding:1px 5px;
+  flex:none;margin-left:4px;
+}
+.smsRow{
+  display:flex;align-items:center;gap:6px;padding:4px 12px;
+  border-top:1px solid var(--hairline);font-size:11px;font-weight:700;
+  background:var(--did-l);color:var(--did-d);
+}
+.smsDot{
+  width:8px;height:8px;border-radius:50%;background:var(--did);flex:none;
+  box-shadow:0 0 0 2px rgba(23,162,184,.25);
+}
+.cn.sms-stripe{box-shadow:inset 5px 0 0 var(--did), 0 1px 3px var(--shadow1)}
+
+/* an IVR key row carrying its destination */
+.krow2{
+  position:relative;display:flex;align-items:center;gap:5px;min-height:19px;padding:2px 12px;
+  font-size:11px;font-weight:700;color:inherit;
+}
+.krow2 .kl{flex:none;width:12px}
+.krow2 .ar{color:var(--faint);flex:none}
+.krow2 .dv{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.krow2.empty{opacity:.42}
+.krow2 .pd{position:absolute;right:-6px;top:50%;transform:translateY(-50%)}
+.krows .krow2 + .krow2{border-top:1px solid var(--hairline)}
+.dsw{
+  display:inline-block;width:9px;height:9px;border-radius:3px;border:1.5px solid;
+  margin-right:5px;vertical-align:-1px;flex:none;
+}
+.seg.adv{font-size:9px;letter-spacing:.3px;font-style:italic}
+.vsel{
+  margin-left:auto;padding:3px 6px;font:inherit;font-size:11.5px;font-weight:600;
+  border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);
+}
 #dlbox{
   position:fixed;inset:0;z-index:330;display:none;
   background:var(--overlay);padding:40px 24px;
@@ -835,7 +949,7 @@ body.zen #expandBtn{background:var(--navy);border-color:var(--navy);color:#fff}
 <div id="banner">
   <span class="brand"><img src="data:image/png;base64,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" alt="coeo" width="75" height="22"></span>
   <h1>PBXware Call Flow Builder</h1>
-  <button class="chip" id="verBtn" onclick="showLog()" title="View the changelog">v0.45.0</button>
+  <button class="chip" id="verBtn" onclick="showLog()" title="View the changelog">v0.57.0</button>
   <button class="vb on" data-v="canvas">Canvas</button><button class="vb" data-v="forms">Forms</button>
   <span class="spacer"></span>
   <input id="projName" class="pname" type="text" maxlength="80" placeholder="Untitled flow"
@@ -861,6 +975,37 @@ body.zen #expandBtn{background:var(--navy);border-color:var(--navy);color:#fff}
       <div class="mgrp">Canvas</div>
       <label class="vitem"><input type="checkbox" id="xrayChk">
         <span><b>See-through destinations</b><i>Wires stay visible behind node bodies.</i></span></label>
+      <div class="vrow"><b>Destinations</b>
+        <select id="didViewSel" class="vsel"
+                title="How much a DID or an IVR says about where its routes go."></select>
+      </div>
+      <div class="vrow"><b>Destination colour</b>
+        <select id="didColSel" class="vsel"
+                title="How a destination's own colour is shown on the node."></select>
+      </div>
+      <div class="msep"></div>
+      <div class="mgrp">Routing view</div>
+      <div class="rvhead">
+        <span class="lnk" data-rvall="1">All</span>
+        <span class="lnk" data-rvnone="1">None</span>
+        <span class="spacer"></span>
+        <span class="n" id="rvSum"></span>
+      </div>
+      <label class="vitem"><input type="checkbox" id="rvDimChk" checked>
+        <span><b>Grey out empty types</b><i>Types the flow has none of are dimmed and cannot be ticked.
+        They draw nothing either way.</i></span></label>
+      <div id="rvList"></div>
+      <div class="msep"></div>
+      <div class="vrow"><b>Inspector fields</b>
+        <select id="formLaySel" class="vsel"
+                title="How the fields in the Inspector are laid out."></select>
+      </div>
+      <div class="vrow"><b>SMS marker</b>
+        <select id="smsViewSel" class="vsel"
+                title="How a DID shows that the number takes SMS."></select>
+      </div>
+      <label class="vitem"><input type="checkbox" id="wireTintChk" checked>
+        <span><b>Colour the wires</b><i>Each wire takes its destination's colour instead of one grey.</i></span></label>
       <label class="vitem"><input type="checkbox" id="autoFitChk" checked>
         <span><b>Auto-fit the flow</b><i>Refit when the window, embed or panel changes size. Zooming by hand switches this off.</i></span></label>
       <div class="msep"></div>
@@ -982,6 +1127,8 @@ body.zen #expandBtn{background:var(--navy);border-color:var(--navy);color:#fff}
 
         <span class="plright">
           <span class="fchip ok" id="findChip" title="Jump to the findings strip">&#10003; clean</span>
+          <button class="fchip hid" id="rvChip" style="display:none"
+                  title="Some routing types are hidden. Click to show them all again."></button>
           <button class="pb" id="expandBtn" title="Fill the window with the work area">&#10530; Expand</button>
           <span class="pl-lab" title="Scale the view. Ctrl or Cmd with the wheel zooms about the pointer.">Zoom</span>
           <span class="zoomgrp">
@@ -1264,9 +1411,12 @@ function seedDoc(){
     '1000  main line \u2192 Main menu. Out of hours to the shared mailbox.\n' +
     '1001  reception ERG \u2192 rings 1001 only. Kept off the menu on purpose.\n' +
     '1002  practice manager direct, on SIP-Backup. No schedule \u2014 rings around the clock.\n' +
-    '1003  billing menu, own schedule, closes Thursday.\n\n' +
+    '1003  billing menu, own schedule, closes Thursday.\n' +
+    '1004  front desk direct \u2014 straight to the group, no menu in front of it.\n' +
+    '1005  briefing bridge, published to staff only.\n\n' +
     'Key 2 goes to the front desk group rather than the queue \u2014 only two agents, and they\n' +
-    'wanted overflow to ring the desk phone rather than hold.\n\n' +
+    'wanted overflow to ring the desk phone rather than hold.\n' +
+    'Key 4 is the Monday briefing bridge. Same conference as 1005, reached both ways.\n\n' +
     'After-hours mailbox is shared at their request. Do not split without asking first.';
   d.ext = [
     { id: uid(), num: '1001', name: 'Reception desk' },
@@ -1286,7 +1436,11 @@ function seedDoc(){
     { id: uid(), num: '3001', name: 'Front desk group', members: ['1001','1002'], last: '1900' }
   ];
   d.q = [
-    { id: uid(), num: '4001', name: 'Appointments', strategy: 'ringall', agents: ['2001','2002'] }
+    { id: uid(), num: '4001', name: 'Appointments', strategy: 'ringall', agents: ['2001','2002'],
+      timeout: '1900' }
+  ];
+  d.conf = [
+    { id: uid(), num: '640', name: 'Practice briefing' }
   ];
   d.erg = [
     { id: uid(), num: '6001', name: 'Reception ERG', ext: '1001' }
@@ -1294,7 +1448,7 @@ function seedDoc(){
   d.ivr = [
     { id: uid(), num: '5000', name: 'Main menu',
       greeting: 'bridgeway-welcome', plays: '3', orient: 'v', collapsed: true,
-      opts: { '1': '4001', '2': '3001', '3': '1004' },
+      opts: { '1': '4001', '2': '3001', '3': '1004', '4': '640' },
       timeout: '3001' },
     { id: uid(), num: '5001', name: 'Billing menu',
       greeting: 'bridgeway-billing', plays: '2', orient: 'v', collapsed: true,
@@ -1305,13 +1459,16 @@ function seedDoc(){
     { id: uid(), num: '8005551000', closed: '1901', isVm: true, sched: 'Mon-Fri 08:30-17:30' },
     { id: uid(), num: '8005551003', closed: '1900', isVm: true, sched: 'Mon-Thu 09:00-17:00' }
   ];
-  /* four lines, four different destination types \u2014 menu, ERG, straight to a
-     handset, and a second menu behind its own schedule. */
+  /* six lines, six different destination types \u2014 menu, ERG, straight to a
+     handset, a second menu behind its own schedule, a group with no menu in
+     front of it, and a conference bridge. */
   d.dids = [
-    { id: uid(), nr: '8005551000', tenant: 'Bridgeway', trunk: 'SIP-Main',   dest: 'IVR',       val: '5000' },
-    { id: uid(), nr: '8005551001', tenant: 'Bridgeway', trunk: 'SIP-Main',   dest: 'ERG',       val: '6001' },
-    { id: uid(), nr: '8005551002', tenant: 'Bridgeway', trunk: 'SIP-Backup', dest: 'Extension', val: '1002' },
-    { id: uid(), nr: '8005551003', tenant: 'Bridgeway', trunk: 'SIP-Main',   dest: 'IVR',       val: '5001' }
+    { id: uid(), nr: '8005551000', tenant: 'Bridgeway', trunk: 'SIP-Main',   dest: 'IVR',        val: '5000', sms: true },
+    { id: uid(), nr: '8005551001', tenant: 'Bridgeway', trunk: 'SIP-Main',   dest: 'ERG',        val: '6001' },
+    { id: uid(), nr: '8005551002', tenant: 'Bridgeway', trunk: 'SIP-Backup', dest: 'Extension',  val: '1002' },
+    { id: uid(), nr: '8005551003', tenant: 'Bridgeway', trunk: 'SIP-Main',   dest: 'IVR',        val: '5001' },
+    { id: uid(), nr: '8005551004', tenant: 'Bridgeway', trunk: 'SIP-Main',   dest: 'Dial Group', val: '3001' },
+    { id: uid(), nr: '8005551005', tenant: 'Bridgeway', trunk: 'SIP-Main',   dest: 'Conference', val: '640'  }
   ];
   return d;
 }
@@ -1320,7 +1477,7 @@ function seedDoc(){
    One entry per editable object type. `key` is the DOC array, `num` is the
    field holding its number, `label`/`title` drive the rail and the list. */
 const TYPES = {
-  did:   { key:'dids',   label:'DIDs',            num:'nr',  base:'',     title:o => o.nr || '(no number)',      sub:o => [o.tenant,o.trunk].filter(Boolean).join(' · ') },
+  did:   { key:'dids',   label:'DIDs',            num:'nr',  base:'',     title:o => o.nr || '(no number)',      sub:o => [o.tenant,o.trunk,o.sms?'SMS':''].filter(Boolean).join(' · ') },
   ivr:   { key:'ivr',    label:'IVRs',            num:'num', base:'5000', title:o => 'IVR ' + o.num,             sub:o => o.name },
   dg:    { key:'dg',     label:'Dial groups',     num:'num', base:'3000', title:o => 'DG ' + o.num,              sub:o => o.name },
   q:     { key:'q',      label:'Queues',          num:'num', base:'4000', title:o => 'Queue ' + o.num,           sub:o => o.name },
@@ -1374,8 +1531,8 @@ function toModel(){
   DOC.agents.forEach(a => { if (a.num) M.agents[a.num] = ((a.first||'') + ' ' + (a.last||'')).trim(); });
   DOC.ivr.forEach(i => { if (i.num) M.ivr[i.num] = { name: i.name || '', opts: Object.assign({}, i.opts), timeout: i.timeout || '' }; });
   DOC.dg .forEach(g => { if (g.num) M.dg[g.num]  = { name: g.name || '', members: (g.members||[]).slice(), last: g.last || '' }; });
-  DOC.erg.forEach(e => { if (e.num) M.erg[e.num] = { name: e.name || '', ext: e.ext || '' }; });
-  DOC.q  .forEach(q => { if (q.num) M.q[q.num]   = { name: q.name || '', strategy: q.strategy || '', agents: (q.agents||[]).slice() }; });
+  DOC.erg.forEach(e => { if (e.num) M.erg[e.num] = { name: e.name || '', ext: e.ext || '', timeout: e.timeout || '' }; });
+  DOC.q  .forEach(q => { if (q.num) M.q[q.num]   = { name: q.name || '', strategy: q.strategy || '', agents: (q.agents||[]).slice(), timeout: q.timeout || '' }; });
   DOC.ot .forEach(o => {
     if (!o.num) return;
     M.ot.add(o.num);
@@ -1488,6 +1645,7 @@ function traceDID(M, did){
       const names = q.agents.map(a => M.agents[a] ? a + ' ' + M.agents[a] : a);
       me.kids.push(N('members', q.agents.length + ' agent(s) rung', names.join(', '), q.strategy || 'ring'));
     }
+    if (q.timeout){ const c = dest(q.timeout, 't/o', []); if (c) me.kids.push(c); }
     return withOT(n, 'Queue', me, edge, []);
   }
 
@@ -1495,6 +1653,7 @@ function traceDID(M, did){
     const e = M.erg[n];
     const me = N('erg', 'ERG ' + n, e.name, edge);
     if (e.ext) me.kids.push(N('ext', 'Ext ' + e.ext, M.ext[e.ext] || '', 'ringall'));
+    if (e.timeout){ const c = dest(e.timeout, 't/o', []); if (c) me.kids.push(c); }
     return withOT(n, 'ERG', me, edge, []);
   }
 
@@ -1598,12 +1757,41 @@ function renderSVG(root, orient){
 const $ = id => document.getElementById(id);
 
 /* ── small form helpers ── */
+const SNET_OPTS = ['Mobile','Office','Business','Agent','Supervisor'];
+
+/* the field used to be free text, and the template shipped values that are not
+   in the list. An unrecognised value is kept and shown rather than dropped, so
+   an import never loses something it cannot classify. */
+function snetList(v){
+  if (Array.isArray(v)) return v.filter(Boolean).map(String);
+  return String(v || '').split(/[;,]/).map(x => x.trim()).filter(Boolean);
+}
+
+/* A fixed set of values, more than one at a time. Two columns, because five
+   items in one column is the tallest thing on the form and the panel is only
+   340px wide. Rendered inline rather than in a popover: the panel is an
+   overflow:auto column, and anything that floats over it has to be positioned
+   against the viewport to avoid being clipped. */
+function fMulti(label, f, vals, opts){
+  const cur = snetList(vals);
+  const all = opts.concat(cur.filter(v => opts.indexOf(v) < 0));
+  const n = cur.length
+    ? '<span class="n">' + cur.length + ' selected</span>'
+    : '<span class="n none">none</span>';
+  return '<div class="fg wide"><label>' + esc(label) + n + '</label>' +
+    '<div class="ck2">' + all.map(v =>
+      '<label' + (opts.indexOf(v) < 0 ? ' class="odd" title="Not one of the standard licences, kept from an import"' : '') + '>' +
+      '<input type="checkbox" data-f="' + f + '" value="' + esc(v) + '"' +
+      (cur.indexOf(v) > -1 ? ' checked' : '') + '><span>' + esc(v) + '</span></label>').join('') +
+    '</div></div>';
+}
+
 function fText(label, f, v, ph){
-  return '<div class="fg"><label>' + esc(label) + '</label>' +
+  return '<div class="fg one"><label>' + esc(label) + '</label>' +
     '<input type="text" data-f="' + f + '" value="' + esc(v || '') + '" placeholder="' + esc(ph || '') + '"></div>';
 }
 function fSel(label, f, v, opts, blank){
-  let h = '<div class="fg"><label>' + esc(label) + '</label><select data-f="' + f + '">';
+  let h = '<div class="fg one"><label>' + esc(label) + '</label><select data-f="' + f + '">';
   h += '<option value=""' + (!v ? ' selected' : '') + '>' + esc(blank || '(not set)') + '</option>';
   opts.forEach(o => {
     h += '<option value="' + esc(o.val) + '"' + (String(o.val) === String(v) ? ' selected' : '') + '>' + esc(o.label) + '</option>';
@@ -1678,6 +1866,9 @@ function objIssue(t, o){
 }
 
 /* ── the editor form for the selected object ── */
+/* whatever the Inspector is currently editing */
+function curObj(){ return find(SEL.type, SEL.id); }
+
 function drawForm(){
   const t = SEL.type, o = find(t, SEL.id);
   if (!o){
@@ -1691,9 +1882,10 @@ function drawForm(){
   let h = issue ? '<div class="f"><h4>\u26a0 ' + esc(issue) + '</h4></div>' : '';
 
   if (t === 'did'){
-    h += '<div class="grid3">' + fText('DID number','nr',o.nr,'8005551000') +
-         fText('Tenant','tenant',o.tenant,'') + fText('Trunk','trunk',o.trunk,'SIP-Main') + '</div>';
+    h += '<div class="grid2">' + fText('DID number','nr',o.nr,'8005551000') + '</div>';
     h += fDest('Destination','val',o.val);
+    h += '<div class="chk"><input type="checkbox" data-f="sms"' + (o.sms ? ' checked' : '') +
+         '><span>SMS enabled on this number</span></div>';
     h += '<p class="sub">Operation Times for this DID are held on the <b>Operation times</b> tab, keyed on the DID number.</p>';
   }
 
@@ -1725,17 +1917,29 @@ function drawForm(){
               ['ringall','leastrecent','fewestcalls','random','rrmemory','linear'].map(s => ({val:s,label:s})),'(default)') + '</div>';
     h += fCheckList('Agents','agents',o.agents,
           DOC.agents.filter(a => a.num).map(a => ({ val: a.num, label: a.num + ' \u2014 ' + ((a.first||'')+' '+(a.last||'')).trim() })));
+    h += '<div class="grid2">' + fText('Timeout','timeout',o.timeout,'1900') + '</div>' +
+         '<p class="hint">Where the caller goes when no agent answers in time.</p>';
   }
 
   if (t === 'erg'){
     h += '<div class="grid2">' + fText('Number','num',o.num,'6000') + fText('Name','name',o.name,'') + '</div>';
     h += fSel('Rings extension','ext',o.ext,
           DOC.ext.filter(e => e.num).map(e => ({ val: e.num, label: 'Ext ' + e.num + (e.name ? ' \u2014 ' + e.name : '') })));
+    h += '<div class="grid2">' + fText('Timeout','timeout',o.timeout,'1900') + '</div>' +
+         '<p class="hint">Where the caller goes when the extension does not answer.</p>';
   }
 
-  if (t === 'ext') h += '<div class="grid3">' + fText('Number','num',o.num,'1000') +
-                        fText('Name','name',o.name,'Reception desk') +
-                        fText('Email','email',o.email,'') + '</div>';
+  if (t === 'ext'){
+    h += '<div class="grid3">' + fText('Number','num',o.num,'1000') +
+         fText('Name','name',o.name,'Reception desk') +
+         fText('Email','email',o.email,'') + '</div>';
+    h += '<div class="grid3">' + fText('Department','dept',o.dept,'Front office') +
+         fText('Phone type (UAD)','uad',o.uad,'Yealink T54W') +
+         fMulti('S-NET Connect','snet',o.snet,SNET_OPTS) + '</div>';
+    h += '<p class="sub">Department, phone type and licence are written as trailing columns on the ' +
+         'Extension sheet. The Map Creator reads that sheet by position and ignores anything after ' +
+         'the columns it wants, so they travel without disturbing it.</p>';
+  }
   if (t === 'vm')  h += '<div class="grid2">' + fText('Number','num',o.num,'1900') + fText('Name','name',o.name,'General mailbox') + '</div>';
   if (t === 'conf') h += '<div class="grid2">' + fText('Number','num',o.num,'600') + fText('Name','name',o.name,'Outage bridge') + '</div>';
   if (t === 'agent') h += '<div class="grid3">' + fText('Number','num',o.num,'2000') +
@@ -1764,6 +1968,7 @@ function drawForm(){
   $('form').innerHTML = h;
 
   /* the inspector shows the same fields, headed by what is selected */
+  applyFormLay();
   const ins = $('insBody');
   if (ins){
     const badge = o
@@ -1782,6 +1987,7 @@ function drawForm(){
    step with what you just typed. */
 
 function refreshRight(){
+  drawRoutingView();
   const M = toModel();
 
   $('stat').innerHTML =
@@ -2016,8 +2222,13 @@ function sheetSet(){
     .concat(DOC.dids.filter(d => d.nr).map(d =>
       pad({0:d.tenant,1:d.nr,2:'-',3:(d.dest || destKind(d.val) || '-'),4:(d.val || '-'),5:'-',6:d.trunk}, 7))) });
 
-  S.push({ name: 'Extension', rows: [ pad({0:'Name',1:'Email',2:'Extension',3:'',4:'Pin',5:'MAC'}, 6) ]
-    .concat(DOC.ext.map(e => pad({0:e.name,1:e.email,2:e.num}, 6))) });
+  /* Department, UAD and the licence are appended after the six real columns.
+     The mapper reads this sheet by position and stops at MAC, so trailing
+     columns travel safely \u2014 unlike Queues, where members run to the row end. */
+  S.push({ name: 'Extension', rows: [ pad({0:'Name',1:'Email',2:'Extension',3:'',4:'Pin',5:'MAC',
+                                           6:'Department',7:'UAD',8:'S-NET Connect'}, 9) ]
+    .concat(DOC.ext.map(e => pad({0:e.name,1:e.email,2:e.num,
+                                  6:e.dept||'',7:e.uad||'',8:snetList(e.snet).join('; ')}, 9))) });
 
   S.push({ name: 'Voicemail', rows: [ pad({0:'Name',1:'Mailbox',2:'Domain',3:'Status'}, 4) ]
     .concat(DOC.vm.map(v => pad({0:v.name,1:v.num,2:'default'}, 4))) });
@@ -2042,8 +2253,10 @@ function sheetSet(){
   S.push({ name: 'Dial Group', rows: [ pad({0:'Group Name',1:'Group Number',2:'Destinations',3:'Last Destination'}, 4) ]
     .concat(DOC.dg.map(g => pad({0:g.name,1:g.num,2:(g.members||[]).join(', '),3:g.last}, 4))) });
 
-  S.push({ name: 'ERG', rows: [ pad({0:'Name',1:'Number',2:'Strategy',3:'# Members',4:'Members',5:'Extension'}, 6) ]
-    .concat(DOC.erg.map(e => pad({0:e.name,1:e.num,2:'ringall',3:(e.ext?'1':'0'),4:e.ext,5:e.ext}, 6))) });
+  /* Timeout is a trailing column the mapper does not read \u2014 appended, never
+     inserted, so the positions buildModel indexes stay exactly where they are */
+  S.push({ name: 'ERG', rows: [ pad({0:'Name',1:'Number',2:'Strategy',3:'# Members',4:'Members',5:'Extension',6:'Timeout'}, 7) ]
+    .concat(DOC.erg.map(e => pad({0:e.name,1:e.num,2:'ringall',3:(e.ext?'1':'0'),4:e.ext,5:e.ext,6:e.timeout||''}, 7))) });
 
   S.push({ name: 'Operation Hours', rows: [ pad({0:'Local Destination',1:'Type',2:'Days',
                                                  3:'Time From',4:'Time to',5:'Afterhours Destination'}, 6) ]
@@ -2061,6 +2274,10 @@ function sheetSet(){
   const qMax = Math.max(1, ...DOC.q.map(q => (q.agents || []).length));
   const qHdr = { 0:'Name', 1:'Number', 2:'Strategy', 3:'Agents' };
   for (let i = 0; i < qMax; i++){ qHdr[4 + i * 2] = 'Members Name ' + (i + 1); qHdr[5 + i * 2] = 'Agent'; }
+  /* No Timeout column here: the mapper consumes name/number PAIRS from column
+     E to the end of the row, so any trailing cell becomes a phantom agent.
+     Proven by round-trip \u2014 '1900' came back as a member. The queue timeout
+     lives in the project file and the CSV, not this sheet. */
   const qW = 4 + qMax * 2;
   S.push({ name: 'Queues', rows: [ pad(qHdr, qW) ]
     .concat(DOC.q.map(q => {
@@ -2357,7 +2574,7 @@ function doSample(){
   refreshAll();
   restorePanel();
   if (CVMODE) autoArrange();
-  cvFlash('Loaded the sample flow \u2014 a small dental practice.');
+  cvFlash('Loaded the sample flow \u2014 a small dental practice, six lines.');
 }
 
 function newDoc(){
@@ -2388,8 +2605,8 @@ function renumber(oldN, newN){
     i.timeout = sw(i.timeout);
   });
   DOC.dg.forEach(g => { g.members = (g.members || []).map(sw); g.last = sw(g.last); });
-  DOC.q.forEach(q => { q.agents = (q.agents || []).map(sw); });
-  DOC.erg.forEach(e => { e.ext = sw(e.ext); });
+  DOC.q.forEach(q => { q.agents = (q.agents || []).map(sw); q.timeout = sw(q.timeout); });
+  DOC.erg.forEach(e => { e.ext = sw(e.ext); e.timeout = sw(e.timeout); });
   DOC.ot.forEach(o => { o.num = sw(o.num); o.closed = sw(o.closed); });
 }
 
@@ -2399,12 +2616,13 @@ function setField(o, f, val, el, box){
     if (val) o.opts[f.slice(4)] = val; else delete o.opts[f.slice(4)];
     return;
   }
-  if (f === 'members' || f === 'agents'){
+  if (f === 'members' || f === 'agents' || f === 'snet'){
     const boxes = (box || $('form')).querySelectorAll('input[type=checkbox][data-f="' + f + '"]');
     o[f] = [].filter.call(boxes, b => b.checked).map(b => b.value);
     return;
   }
   if (f === 'isVm'){ o.isVm = el.checked; return; }
+  if (f === 'sms'){ o.sms = el.checked; return; }
 
   const T = TYPES[SEL.type];
   if (f === T.num && SEL.type !== 'ot'){ renumber(o[f], val); }
@@ -2431,11 +2649,11 @@ function addObj(){
   else if (t === 'ivr'){ Object.assign(o, { num: nextNum(t), name:'', greeting:'', plays:'3',
                                             orient:'v', collapsed:true, opts:{}, timeout:'' }); }
   else if (t === 'dg'){ Object.assign(o, { num: nextNum(t), name:'', members:[], last:'' }); }
-  else if (t === 'q'){ Object.assign(o, { num: nextNum(t), name:'', strategy:'ringall', agents:[] }); }
-  else if (t === 'erg'){ Object.assign(o, { num: nextNum(t), name:'', ext:'' }); }
+  else if (t === 'q'){ Object.assign(o, { num: nextNum(t), name:'', strategy:'ringall', agents:[], timeout:'' }); }
+  else if (t === 'erg'){ Object.assign(o, { num: nextNum(t), name:'', ext:'', timeout:'' }); }
   else if (t === 'agent'){ Object.assign(o, { num: nextNum(t), first:'', last:'', bind:'' }); }
   else if (t === 'ot'){ Object.assign(o, { num:'', closed:'', isVm:false, sched:'' }); }
-  else if (t === 'ext'){ Object.assign(o, { num: nextNum(t), name:'', email:'' }); }
+  else if (t === 'ext'){ Object.assign(o, { num: nextNum(t), name:'', email:'', dept:'', uad:'', snet:[] }); }
   else { Object.assign(o, { num: nextNum(t), name:'' }); }
   arr(t).push(o);
   SEL.id = o.id;
@@ -2572,10 +2790,16 @@ function portsFor(t, o){
   }
   if (t === 'dg'){
     p.push({ f:'members', label:'rings', kind:'ext', multi:true });
-    p.push({ f:'last', label:'no answer', kind:'dest' });
+    p.push({ f:'last', label:'t/o', kind:'dest' });   /* PBXware's Last Destination */
   }
-  if (t === 'q')   p.push({ f:'agents', label:'agents', kind:'agent', multi:true });
-  if (t === 'erg') p.push({ f:'ext', label:'rings', kind:'ext' });
+  if (t === 'q'){
+    p.push({ f:'agents', label:'agents', kind:'agent', multi:true });
+    p.push({ f:'timeout', label:'t/o', kind:'dest' });
+  }
+  if (t === 'erg'){
+    p.push({ f:'ext', label:'rings', kind:'ext' });
+    p.push({ f:'timeout', label:'t/o', kind:'dest' });
+  }
   /* IVRs, ring groups and queues carry a standing Closed port \u2014 wiring it is
      how an after-hours path is made, and creates the gate itself. Every other
      type shows it only once a \u23f1 gate exists. */
@@ -2698,6 +2922,235 @@ function autoArrange(dir){
    else. Focus dims it, Filter omits it. Neither ever moves a node: a position
    is global, so the two are the same feature at two dim levels. */
 let CVIEW = { tab: 'all', mode: 'focus' };
+/* How much a DID node says about where it goes. 'detail' is the default: the
+   question "where does this DID land?" is the one people open the tool to
+   answer, and the wire alone only answers it for a canvas you can take in at a
+   glance. Per node, o.adv overrides: true forces detail, false forces nothing,
+   undefined follows this. */
+let DESTVIEW = 'name';
+/* How a destination's own colour is shown. Tint reads fastest; swatch keeps
+   colour out of competition with amber-means-gate and red-means-broken. */
+let DIDCOL = 'tint';
+const DIDCOLS = [
+  ['off',    'No colour',   'Every destination looks the same.'],
+  ['tint',   'Tinted',      "The row takes the destination's own fill and ink."],
+  ['stripe', 'Left stripe', 'A bar in the destination colour, row otherwise plain.'],
+  ['swatch', 'Swatch',      'A small chip of the destination node before the label.']
+];
+/* wires: one grey, or each in its destination's colour */
+let WIRETINT = true;
+/* how a DID says it takes SMS. It is not routing \u2014 it draws no wire and changes
+   no path \u2014 so it gets its own marker rather than a port row. */
+/* The panel is 340px. Three fields across leaves 78px of text room, so a phone
+   model and an email address are both cut off before they can be read. */
+/* Which routing types are drawn. Everything that can be a destination, less the
+   DID that starts a call and the extension that ends it \u2014 those two are the
+   ends of every route and hiding them would leave nothing to read. */
+const RV_TYPES = ['ivr','dg','q','erg','vm','conf','agent'];
+let RVHIDE = {};                       /* type -> true when hidden */
+/* A type with nothing in it draws nothing either way, so it is dimmed rather
+   than unhidden: unticking it would make the summary claim something is hidden
+   when nothing is, and would mean the first object you added never appeared. */
+let RVDIM = true;
+const rvShown = t => !RVHIDE[t];
+const rvHiddenCount = () => RV_TYPES.filter(t => RVHIDE[t]).length;
+
+let FORMLAY = 'rows';
+const FORMLAYS = [
+  ['rows', 'One field per row', 'Label beside the input. Nothing is truncated. The default.'],
+  ['grid', 'Two across',        'Shorter, but a long value such as an email address is still cut.']
+];
+
+let SMSVIEW = 'row';
+const SMSVIEWS = [
+  ['off',    'Not shown',   'SMS is still set on the DID, just not drawn.'],
+  ['pill',   'Pill',        'A teal pill in the subtitle. No extra height.'],
+  ['row',    'Its own row', 'A band with a lit dot. Loudest, about 22px per SMS DID. The default.'],
+  ['stripe', 'Edge stripe', 'A badge in the header and a bar down the node. Readable at any zoom.']
+];
+
+/* the palette only holds six colours for nine types \u2014 ivr, dg and vm share a
+   green \u2014 so this is a hint, not an identifier. The label stays precise. */
+/* a DOM-safe id per colour, so markers can be reused across redraws */
+const tipId = c => 'cvtip_' + String(c).replace(/[^a-z0-9]/gi, '');
+
+/* the three ways a destination colour can be shown, as ready-made attributes */
+function destStyle(sk){
+  if (!sk || DIDCOL === 'off') return { row:'', ink:'', chip:'' };
+  if (DIDCOL === 'tint')
+    return { row:' style="background:' + sk[0] + ';color:' + sk[1] + '"', ink:'', chip:'' };
+  if (DIDCOL === 'stripe')
+    return { row:' style="box-shadow:inset 4px 0 0 ' + sk[2] + '"',
+             ink:' style="color:' + sk[1] + '"', chip:'' };
+  return { row:'', ink:'',
+           chip:'<i class="dsw" style="background:' + sk[0] + ';border-color:' + sk[2] + '"></i>' };
+}
+
+/* One rule for every port row on every type: at 'off' the plain label, and
+   above it the destination itself. Only the row a wire leaves from can carry a
+   destination, so members and agents list what they reach. */
+function portLabel(t, o, p, vals){
+  const md = destShows(o);
+  const plain = { lbl: p.label + (p.multi && vals.length ? ' (' + vals.length + ')' : ''),
+                  bad: false, sk: null };
+  if (md === 'off') return plain;
+
+  const nameOf = v => {
+    const hit = byNum(v);
+    if (!hit) return { txt: String(v), bad: true };
+    return { txt: md === 'num' ? String(v)
+                 : CV_LABEL[hit.t] + ' ' + v + (nodeSub(hit.t, hit.o) ? ' ' + nodeSub(hit.t, hit.o) : ''),
+             bad: false, hit: hit };
+  };
+
+  if (p.multi){
+    if (!vals.length) return plain;
+    const parts = vals.map(nameOf);
+    return { lbl: p.label + ' ' + parts.map(x => x.txt).join(', '),
+             full: p.label + ' \u2014 ' + parts.map(x => x.txt).join(', '),
+             bad: parts.some(x => x.bad),
+             sk: parts.length === 1 && parts[0].hit ? SKIN[parts[0].hit.t] : null };
+  }
+
+  const v = p.f === 'ot:closed' ? ((otFor(numFor(t, o)) || {}).closed || '') : vals[0];
+  if (!v) return p.f === 'val' ? { lbl: 'not routed yet', bad: true, sk: null } : plain;
+  const n = nameOf(v);
+  /* the clock already says "after hours"; the arrow already says "goes to".
+     Anything else keeps its own label, so a ring group reads "rings 1001"
+     rather than losing the word that says what the port does. */
+  const mark = p.ot ? '\u23f1 ' : (p.f === 'val' ? '\u2192 ' : p.label + ' ');
+  return { lbl: mark + n.txt, bad: n.bad, sk: n.hit ? SKIN[n.hit.t] : null };
+}
+
+function destSkin(v){
+  const hit = v ? byNum(v) : null;
+  return hit && SKIN[hit.t] ? SKIN[hit.t] : null;
+}
+/* One scale, both node types. Each places it where it fits: a DID on its
+   routes-to and closed rows, an IVR on its key rows. The closed row is included
+   whenever a gate exists, so it is not a mode of its own. */
+const DESTVIEWS = [
+  ['off',    'Nothing',          'Bare labels. No destinations shown.'],
+  ['num',    'Number only',      'Where each route goes, by number. Keeps an IVR narrow.'],
+  ['name',   'Number and name',  'Number and the object\u2019s name. The default.'],
+  ['detail', 'Full detail',      'Adds a summary block: after-hours, hours and reach.']
+];
+/* projects saved before the scale existed \u2014 the old names described placement */
+const DESTMIGRATE = { off:'off', row:'name', both:'name', line:'name', detail:'detail' };
+
+/* the first hop only \u2014 the thing the wire points at. The chain beyond it is
+   what the traced map is for. */
+function didDest(o){
+  const v = o && o.val;
+  if (!v) return null;
+  const hit = byNum(v);
+  if (!hit) return { label: String(v), name: '', missing: true };
+  return { label: CV_LABEL[hit.t] + ' ' + v, name: nodeSub(hit.t, hit.o) || (hit.o.name || ''), t: hit.t };
+}
+
+/* dial groups, queues and ring groups: the same summary the DID and the IVR
+   get, built from whatever that type actually has */
+function objBlock(t, o){
+  if (destShows(o) !== 'detail') return '';
+  if (t !== 'dg' && t !== 'q' && t !== 'erg') return '';
+  const row = (k, v, bad) => '<div class="r"><span class="k">' + k + '</span><span class="v' +
+    (bad ? ' bad' : '') + '" title="' + esc(v) + '">' + esc(v) + '</span></div>';
+  const named = v => { const h = byNum(v); return h ? CV_LABEL[h.t] + ' ' + v +
+    (nodeSub(h.t, h.o) ? ' \u00b7 ' + nodeSub(h.t, h.o) : '') : String(v); };
+  let h = '<div class="cnadv">';
+  if (t === 'dg'){
+    const m = o.members || [];
+    h += row('Rings', m.length ? m.length + ' extension' + (m.length === 1 ? '' : 's') : 'nobody', !m.length);
+  }
+  if (t === 'q'){
+    const a = o.agents || [];
+    h += row('Agents', a.length ? a.length + ' agent' + (a.length === 1 ? '' : 's') : 'none', !a.length);
+    if (o.strategy) h += row('Strategy', o.strategy);
+  }
+  if (t === 'erg') h += o.ext ? row('Rings', named(o.ext)) : row('Rings', 'no extension set', true);
+  const to = t === 'dg' ? o.last : o.timeout;
+  h += to ? row('Timeout', named(to), !byNum(to))
+          : row('Timeout', 'not set', true);
+  const ot = otFor(numFor(t, o));
+  if (ot && ot.closed) h += row('After hours', named(ot.closed), !byNum(ot.closed));
+  return h + '</div>';
+}
+
+/* the IVR's own summary, at the detail step */
+function ivrBlock(o){
+  if (destShows(o) !== 'detail') return '';
+  const row = (k, v, bad) => '<div class="r"><span class="k">' + k + '</span><span class="v' +
+    (bad ? ' bad' : '') + '" title="' + esc(v) + '">' + esc(v) + '</span></div>';
+  const used = IVR_KEYS.filter(k => (o.opts || {})[k]).length;
+  const to = o.timeout ? byNum(o.timeout) : null;
+  let h = '<div class="cnadv">';
+  h += row('Keys used', used + ' of ' + IVR_KEYS.length, !used);
+  h += o.timeout
+    ? row('Timeout', to ? CV_LABEL[to.t] + ' ' + o.timeout + (nodeSub(to.t, to.o) ? ' \u00b7 ' + nodeSub(to.t, to.o) : '')
+                       : o.timeout, !to)
+    : row('Timeout', 'not set \u2014 silent callers drop', true);
+  const ot = otFor(o.num);
+  if (ot && ot.closed){
+    const cd = byNum(ot.closed);
+    h += row('After hours', cd ? CV_LABEL[cd.t] + ' ' + ot.closed : ot.closed, !cd);
+  }
+  return h + '</div>';
+}
+
+function didBlock(o){
+  const md = didShows(o);
+  /* 'row' and 'both' write into the port rows themselves \u2014 see portLabel \u2014
+     so they contribute nothing here and cost no height */
+  if (md !== 'detail') return '';
+  const dd = didDest(o);
+  const line = d => {
+    if (!d) return '<div class="cnd bad"><span class="ar">\u2192</span><b>not routed yet</b></div>';
+    const dc = d.missing ? { row:'', chip:'' } : destStyle(destSkin(o.val));
+    return '<div class="cnd' + (d.missing ? ' bad' : '') + '"' + dc.row +
+      ' title="' + esc(d.label + (d.name ? ' \u2014 ' + d.name : '')) + '">' +
+      dc.chip + '<span class="ar">\u2192</span><b>' + esc(d.label) + '</b>' +
+      (d.name ? '<span class="nm">' + esc(d.name) + '</span>' : '') + '</div>';
+  };
+
+  if (md === 'line') return line(dd);
+
+  const ot = otFor(o.nr);
+
+  const row = (k, v, cls) => '<div class="r"><span class="k">' + k + '</span><span class="v' +
+    (cls ? ' ' + cls : '') + '" title="' + esc(v) + '">' + esc(v) + '</span></div>';
+  let h = '<div class="cnadv">';
+  if (dd && !dd.missing){
+    const dc = destStyle(destSkin(o.val));
+    h += '<div class="r"' + dc.row + '><span class="k">Routes to</span>' +
+         '<span class="v"' + dc.ink + '>' + dc.chip +
+         esc(dd.label + (dd.name ? ' \u00b7 ' + dd.name : '')) + '</span></div>';
+  } else {
+    h += row('Routes to', dd ? dd.label : 'not routed yet', 'bad');
+  }
+  if (ot){
+    const cd = ot.closed ? byNum(ot.closed) : null;
+    h += row('After hours', ot.closed
+      ? (cd ? CV_LABEL[cd.t] + ' ' + ot.closed + (nodeSub(cd.t, cd.o) ? ' \u00b7 ' + nodeSub(cd.t, cd.o) : '') : ot.closed)
+      : 'gate set, no path', ot.closed ? '' : 'bad');
+    if (String(ot.sched || '').trim()) h += row('Hours', ot.sched);
+  }
+  if (o.nr){
+    const n = reachFrom(o.nr).size - 1;
+    h += row('Reaches', n + (n === 1 ? ' object' : ' objects'), n ? '' : 'bad');
+  }
+  return h + '</div>';
+}
+
+function destShows(o){
+  if (o.adv === true)  return 'detail';
+  /* simple means "number only", not "nothing": stripping the destination out
+     entirely loses the routing, which is the thing the node is for. It also
+     lands at 150px, where the control strip fits on one line. */
+  if (o.adv === false) return 'num';
+  return DESTVIEW;
+}
+const didShows = destShows;              /* the DID paths still read well */
+
 let VIEWSET = null;                    /* Set of 'type:num', or null for all */
 
 const keyOf = (t, o) => t + ':' + (t === 'did' ? o.nr : numFor(t, o));
@@ -2793,6 +3246,7 @@ function fitView(quiet){
   if (!sc) return;
   let x1 = 1e9, y1 = 1e9, x2 = -1e9, y2 = -1e9, any = false;
   CV_TYPES.forEach(t => arr(t).forEach(o => {
+    if (!rvShown(t)) return;
     if (VIEWSET && !VIEWSET.has(keyOf(t, o))) return;
     if (typeof o.x !== 'number') return;
     const z = nodeSize(t, o);
@@ -2837,6 +3291,145 @@ function autoFitSoon(){
     autoFitNow('resize');
   }, 140);
 }
+function setDestView(v, quiet){
+  v = DESTMIGRATE[v] || v;
+  DESTVIEW = DESTVIEWS.some(x => x[0] === v) ? v : 'name';
+  const sel = $('didViewSel');
+  if (sel) sel.value = DESTVIEW;
+  if (DOC && DOC.meta) DOC.meta.destview = DESTVIEW;
+  SIZED = {};                 /* both types just changed width and height */
+  drawCanvas();
+  /* every node just changed size because of a global switch, not because the
+     person moved anything, so the app clears up after itself rather than
+     leaving collisions behind */
+  const moved = tidyOverlaps(true);
+  if (moved) drawCanvas();
+  autoFitSoon();
+  if (!quiet){
+    const lab = (DESTVIEWS.find(x => x[0] === DESTVIEW) || [])[1] || DESTVIEW;
+    cvFlash('Destinations: ' + lab.toLowerCase() + '.' +
+            (moved ? ' Moved ' + moved + ' node(s) that no longer fitted.' : ''));
+  }
+}
+const setDidView = setDestView;
+
+/* ── routing view ─────────────────────────────────────────────────────────
+   Hidden types are removed from the drawing rather than faded: Focus already
+   fades, and two kinds of dimming on one canvas cannot be told apart. Nothing
+   moves, so ticking a box back restores the picture exactly. */
+function drawRvChip(){
+  const c = $('rvChip');
+  if (!c) return;
+  const hid = RV_TYPES.filter(t => RVHIDE[t]);
+  c.style.display = hid.length ? '' : 'none';
+  c.textContent = '\u25c9 ' + hid.length + ' type' + (hid.length === 1 ? '' : 's') + ' hidden';
+  c.title = 'Hidden: ' + hid.map(t => CV_LABEL[t]).join(', ') + '. Click to show them all again.';
+}
+
+function drawRoutingView(){
+  drawRvChip();
+  const list = $('rvList');
+  if (!list) return;
+  const qHidden = !!RVHIDE.q;
+  list.innerHTML = RV_TYPES.map(t => {
+    const sk = SKIN[t] || SKIN.members;
+    const n = arr(t).length;
+    const orphan = (t === 'agent' && qHidden && rvShown('agent'));
+    /* only dim a type that is empty AND not deliberately hidden \u2014 otherwise a
+       hidden type you emptied could never be ticked back on */
+    const mt = RVDIM && n === 0 && rvShown(t);
+    return '<label class="rv' + (rvShown(t) ? '' : ' off') + (orphan ? ' orphan' : '') +
+      (mt ? ' mt' : '') + '"' +
+      (mt ? ' title="Nothing of this type in the flow yet."'
+          : orphan ? ' title="Queues are hidden, so these agents have nothing visible to hang from."' : '') + '>' +
+      '<input type="checkbox" data-rv="' + t + '"' + (rvShown(t) ? ' checked' : '') +
+      (mt ? ' disabled' : '') + '>' +
+      '<i class="sw" style="background:' + sk[0] + ';border-color:' + sk[2] + '"></i>' +
+      '<b>' + esc(CV_LABEL[t]) + '</b><span class="n">' + (mt ? 'none' : n) + '</span></label>';
+  }).join('');
+  const n = rvHiddenCount();
+  const sum = $('rvSum');
+  if (sum) sum.textContent = n ? n + ' hidden' : 'everything shown';
+}
+
+function setRvDim(on, fromUser){
+  RVDIM = !!on;
+  const c = $('rvDimChk');
+  if (c) c.checked = RVDIM;
+  if (DOC && DOC.meta) DOC.meta.rvdim = RVDIM;
+  drawRoutingView();
+  if (fromUser) cvFlash(RVDIM ? 'Empty routing types are greyed out.'
+                              : 'Showing every routing type in the list.');
+}
+
+function setRouting(t, on, quiet){
+  if (t === '*') RV_TYPES.forEach(k => { if (on) delete RVHIDE[k]; else RVHIDE[k] = true; });
+  else if (on) delete RVHIDE[t]; else RVHIDE[t] = true;
+  if (DOC && DOC.meta) DOC.meta.rvhide = RV_TYPES.filter(k => RVHIDE[k]);
+  drawRoutingView();
+  drawCanvas();
+  refreshRight();
+  autoFitSoon();
+  if (!quiet){
+    const n = rvHiddenCount();
+    cvFlash(n ? n + ' routing type(s) hidden. Nothing was moved or deleted.'
+              : 'Showing every routing type again.');
+  }
+}
+
+function setFormLay(v, quiet){
+  FORMLAY = FORMLAYS.some(x => x[0] === v) ? v : 'rows';
+  const sel = $('formLaySel');
+  if (sel) sel.value = FORMLAY;
+  if (DOC && DOC.meta) DOC.meta.formlay = FORMLAY;
+  applyFormLay();
+  if (!quiet) cvFlash('Inspector fields: ' +
+    ((FORMLAYS.find(x => x[0] === FORMLAY) || [])[1] || FORMLAY).toLowerCase() + '.');
+}
+/* one class on each form container drives it, so no form markup changes */
+function applyFormLay(){
+  ['form', 'insBody'].forEach(id => {
+    const el = $(id);
+    if (!el) return;
+    el.classList.toggle('lay-rows', FORMLAY === 'rows');
+    el.classList.toggle('lay-grid', FORMLAY === 'grid');
+  });
+}
+
+function setSmsView(v, quiet){
+  SMSVIEW = SMSVIEWS.some(x => x[0] === v) ? v : 'row';
+  const sel = $('smsViewSel');
+  if (sel) sel.value = SMSVIEW;
+  if (DOC && DOC.meta) DOC.meta.smsview = SMSVIEW;
+  SIZED = {};                    /* the row option changes every SMS DID's height */
+  drawCanvas();
+  const moved = tidyOverlaps(true);
+  if (moved) drawCanvas();
+  autoFitSoon();
+  if (!quiet) cvFlash('SMS marker: ' +
+    ((SMSVIEWS.find(x => x[0] === SMSVIEW) || [])[1] || SMSVIEW).toLowerCase() + '.');
+}
+
+function setDidCol(v, quiet){
+  DIDCOL = DIDCOLS.some(x => x[0] === v) ? v : 'tint';
+  const sel = $('didColSel');
+  if (sel) sel.value = DIDCOL;
+  if (DOC && DOC.meta) DOC.meta.didcol = DIDCOL;
+  SIZED = {};                     /* a swatch changes the row's measured height */
+  drawCanvas();
+  if (!quiet) cvFlash('Destination colour: ' +
+    ((DIDCOLS.find(x => x[0] === DIDCOL) || [])[1] || DIDCOL).toLowerCase() + '.');
+}
+
+function setWireTint(on, fromUser){
+  WIRETINT = !!on;
+  const c = $('wireTintChk');
+  if (c) c.checked = WIRETINT;
+  if (DOC && DOC.meta) DOC.meta.wiretint = WIRETINT;
+  drawWires();
+  if (fromUser) cvFlash(WIRETINT ? 'Wires coloured by destination.' : 'Wires back to one grey.');
+}
+
 function setAutoFit(on, fromUser){
   AUTOFIT = !!on;
   const c = $('autoFitChk');
@@ -2887,6 +3480,7 @@ function drawCanvas(){
 
   let h = '<svg id="wires"></svg>';
   CV_TYPES.forEach(t => arr(t).forEach(o => {
+    if (!rvShown(t)) return;                     /* hidden by the routing view */
     const inView = !VIEWSET || VIEWSET.has(keyOf(t, o));
     if (!inView && hide) return;
     const n = numFor(t, o) || (t === 'did' ? o.nr : '');
@@ -2898,26 +3492,57 @@ function drawCanvas(){
 
     const horiz = (t === 'ivr' && o.orient === 'h');
     const sz = nodeSize(t, o);
+    const smsMark = (t === 'did' && o.sms && SMSVIEW !== 'off') ? SMSVIEW : '';
     h += '<div class="cn cn-' + t + (t === 'ivr' ? (horiz ? ' ivr-h' : ' ivr-v') : '') +
+         (smsMark === 'stripe' ? ' sms-stripe' : '') +
          (CVSEL === o.id ? ' sel' : '') + (inView ? '' : ' dimmed') +
          '" data-t="' + t + '" data-id="' + o.id +
          '" style="left:' + (o.x || 30) + 'px;top:' + (o.y || 30) + 'px' +
          (t === 'ivr' ? ';width:' + sz.w + 'px' : '') + '">';
     h += '<i class="in' + (horiz ? ' top' : '') + '" data-in="' + o.id + '"></i>';
     h += '<div class="cnh"><span class="cnt">' + esc(nodeTitle(t, o)) + '</span>' +
+         (smsMark === 'stripe' ? '<span class="smsHdr" title="SMS enabled">SMS</span>' : '') +
          (issue ? '<span class="cnw" title="' + esc(issue) + '">\u26a0</span>' : '') +
          (ENDPOINT[t] ? '' : '<button class="cnot' + (ot ? ' on' : '') + '" data-ot="' + o.id +
             '" title="Operation Times gate">\u23f1</button>') +
          '<button class="cnx" data-del="' + o.id + '" title="Delete">\u00d7</button></div>';
-    if (nodeSub(t, o)) h += '<div class="cns">' + esc(nodeSub(t, o)) + '</div>';
+    const smsOn = (t === 'did' && o.sms && SMSVIEW !== 'off');
+    const subTxt = nodeSub(t, o);
+    if (subTxt || (smsOn && SMSVIEW === 'pill'))
+      h += '<div class="cns">' + esc(subTxt) +
+           (smsOn && SMSVIEW === 'pill' ? '<span class="smsChip">SMS</span>' : '') + '</div>';
+    if (t === 'did') h += didBlock(o);
     if (t === 'ivr'){
       h += o.greeting
         ? '<div class="cng">\u266a ' + esc(o.greeting) + ' \u00b7 plays ' + esc(o.plays || '3') + '</div>'
         : '<div class="cng none">\u266a no greeting set</div>';
     }
 
-    if (t === 'ivr'){
+    if (t === 'did'){
+      const md = destShows(o);
       h += '<div class="ivrctl">' +
+           '<span class="seg adv' + (md === 'num' ? ' on' : '') + '" data-simple="' + o.id +
+           '" title="Simple view \u2014 the destination number, nothing else. Click again to follow the View menu.">S</span>' +
+           '<span class="seg adv' + (md === 'detail' ? ' on' : '') + '" data-adv="' + o.id +
+           '" title="Full detail for this DID. Click again to follow the View menu.">i</span></div>';
+    }
+    if (t === 'ivr') h += ivrBlock(o);
+    h += objBlock(t, o);
+    if (t === 'dg' || t === 'q' || t === 'erg'){
+      const om = destShows(o);
+      h += '<div class="ivrctl">' +
+           '<span class="seg adv' + (om === 'num' ? ' on' : '') + '" data-simple="' + o.id +
+           '" title="Simple view \u2014 numbers only. Click again to follow the View menu.">S</span>' +
+           '<span class="seg adv' + (om === 'detail' ? ' on' : '') + '" data-adv="' + o.id +
+           '" title="Full detail for this one. Click again to follow the View menu.">i</span></div>';
+    }
+    if (t === 'ivr'){
+      const smd = destShows(o);
+      h += '<div class="ivrctl">' +
+           '<span class="seg adv' + (smd === 'num' ? ' on' : '') + '" data-simple="' + o.id +
+           '" title="Simple view \u2014 each key and the number it goes to, nothing else. Click again to follow the View menu.">S</span>' +
+           '<span class="seg adv' + (smd === 'detail' ? ' on' : '') + '" data-adv="' + o.id +
+           '" title="Full detail for this menu. Click again to follow the View menu.">i</span>' +
            '<span class="seg' + (horiz ? '' : ' on') + '" data-orient="v" title="Keys as rows, wires leave the right edge">V</span>' +
            '<span class="seg' + (horiz ? ' on' : '') + '" data-orient="h" title="Keys as columns, wires leave the bottom edge">H</span>' +
            '<span class="seg cl" data-collapse="1" title="' +
@@ -2925,12 +3550,21 @@ function drawCanvas(){
            (o.collapsed ? '+' : '\u2212') + '</span></div>';
     }
 
+    /* On an IVR the closed row belongs after the keys: it is the fallback,
+       and putting it above them read as if it came first. Everything else keeps
+       its rows where they were. */
+    let portRows = '';
     bigPorts.forEach(p => {
       const vals = portVals(t, o, p.f);
-      h += '<div class="pr' + (p.ot ? ' ot' : '') + (vals.length ? ' set' : '') + '">' +
-           '<span class="pn">' + esc(p.label) + (p.multi && vals.length ? ' (' + vals.length + ')' : '') + '</span>' +
+      const pl = portLabel(t, o, p, vals);
+      const dc = (pl.sk && !pl.bad) ? destStyle(pl.sk) : { row:'', ink:'', chip:'' };
+      portRows += '<div class="pr' + (p.ot ? ' ot' : '') + (vals.length ? ' set' : '') + '"' + dc.row + '>' +
+           '<span class="pn' + (pl.bad ? ' bad' : '') + '"' + dc.ink + ' title="' + esc(pl.full || pl.lbl) + '">' +
+           dc.chip + esc(pl.lbl) + '</span>' +
            '<i class="pd" data-port="' + p.f + '" data-owner="' + o.id + '"></i></div>';
     });
+    if (t !== 'ivr') h += portRows;
+
     if (t === 'ivr'){
       const r = ivrRows(o);
       const dir = horiz ? 'down' : 'right';
@@ -2938,9 +3572,14 @@ function drawCanvas(){
          keypad order. The timeout row is always present — its absence is the
          single most common misconfiguration, so it never gets hidden. */
       const keys = o.collapsed ? r.keys : IVR_KEYS.slice();
-      const full = keys.map(k => ({ f: 'opt:' + k, label: k, set: !!(o.opts || {})[k] }));
-      full.push({ f: 'timeout', label: 't/o', set: !!o.timeout });
-      const cls = horiz ? 'kcol' : 'krow';
+      const full = keys.map(k => ({ f: 'opt:' + k, label: k, set: !!(o.opts || {})[k],
+                                    val: (o.opts || {})[k] }));
+      full.push({ f: 'timeout', label: 't/o', set: !!o.timeout, val: o.timeout });
+      /* horizontal keys are 34px columns \u2014 no text fits at any sane width, so
+         they take the colour and nothing else, whatever the scale says */
+      const md = destShows(o);
+      const wide = !horiz && md !== 'off';
+      const cls = horiz ? 'kcol' : (wide ? 'krow2' : 'krow');
       h += '<div class="' + (horiz ? 'kcols' : 'krows') + '">';
       full.forEach(c => {
         const tip = c.f === 'timeout'
@@ -2948,8 +3587,21 @@ function drawCanvas(){
             'invalid key and each replay counts, so this is reached after ' + (o.plays || '3') +
             ' play(s). Drag to a destination.'
           : 'Menu key ' + c.label + ' \u2014 drag to a destination';
-        h += '<div class="' + cls + (c.set ? ' set' : '') + '" title="' + esc(tip) + '">' +
-             '<span class="kl">' + esc(c.label) + '</span>' +
+        const sk = (md !== 'off' && c.val) ? destSkin(c.val) : null;
+        const dc = sk ? destStyle(sk) : { row:'', ink:'', chip:'' };
+        let body = '<span class="kl">' + esc(c.label) + '</span>';
+        if (wide && c.val){
+          const hit = byNum(c.val);
+          const txt = (md === 'num' || !hit)
+            ? String(c.val)
+            : CV_LABEL[hit.t] + ' ' + c.val + (nodeSub(hit.t, hit.o) ? ' ' + nodeSub(hit.t, hit.o) : '');
+          body += dc.chip + '<span class="ar">\u2192</span><span class="dv"' + dc.ink + '>' +
+                  esc(txt) + '</span>';
+        } else if (wide){
+          body += '<span class="dv"></span>';
+        }
+        h += '<div class="' + cls + (c.set ? ' set' : '') + (wide && !c.val ? ' empty' : '') + '"' +
+             (horiz || !wide ? '' : dc.row) + ' title="' + esc(tip) + '">' + body +
              '<i class="pd" data-port="' + c.f + '" data-owner="' + o.id + '" data-dir="' + dir +
              '" title="' + esc(tip) + '"></i></div>';
       });
@@ -2957,7 +3609,10 @@ function drawCanvas(){
         h += '<div class="' + cls + ' more" data-collapse="1" title="Show every key">' +
              (horiz ? '+' + r.hidden : '+ ' + r.hidden + ' more') + '</div>';
       h += '</div>';
+      h += portRows;
     }
+    if (smsMark === 'row')
+      h += '<div class="smsRow" title="SMS is enabled on this number"><span class="smsDot"></span>SMS enabled</div>';
     if (ENDPOINT[t])
       h += '<div class="pr end"><span class="pn">' +
            (t === 'agent' ? 'reached only from a queue' : 'endpoint \u2014 call stops here') +
@@ -3028,12 +3683,42 @@ function ivrRows(o){
 /* the CSS box, element by element, so an estimate cannot drift from the
    stylesheet the way a flat 108 did */
 const NB = { border: 3.2, header: 30, sub: 23.5, greet: 22.75, ctl: 29.75,
-             pr: 25.5, krow: 18, more: 21, kcol: 35.5, rowsBorder: 1, margin: 2 };
+             pr: 25.5, krow: 18, more: 21, kcol: 35.5, rowsBorder: 1, margin: 2,
+             /* the DID destination block: one .cnd line, and the detail box's
+                top rule plus a row. Measured sizes replace these as soon as a
+                node renders, but placement happens before that, so an estimate
+                that ignored them put new DIDs on top of their neighbours. */
+             cnd: 26, advTop: 6, advRow: 17, ctlAdv: 29.75, krow2: 23,
+             /* control strip: measured button widths, the gap, and what a
+                wrapped second row costs */
+             segW: { S:23.3, i:19.1, V:23.3, H:23.9, C:22.4 }, segGap: 3,
+             ctlPad: 18, ctlRow: 21 };
+
+/* how tall the IVR control strip is at a given node width */
+function ctlHeight(width){
+  const w = NB.segW;
+  const one = w.S + w.i + w.V + w.H + w.C + NB.segGap * 4 + NB.ctlPad;
+  return NB.ctl + (one > width ? NB.ctlRow : 0);
+}
+
+/* how many lines the DID block adds, so the estimate and the DOM agree */
+function didBlockRows(o){
+  const md = didShows(o);
+  if (md !== 'detail') return { lines: 0, rows: 0 };
+  const ot = otFor(o.nr);
+  let rows = 1;                                   /* routes to */
+  if (ot){ rows += 1; if (String(ot.sched || '').trim()) rows += 1; }
+  if (o.nr) rows += 1;                            /* reaches */
+  return { lines: 0, rows: rows };
+}
 
 let SIZED = {};                              /* real heights, once measured */
 function sizeSig(t, o){
   const r = (t === 'ivr') ? ivrRows(o) : null;
   return [t, o.orient || '', o.collapsed ? 1 : 0,
+          t === 'did' ? destShows(o) + (o.val ? 'r' : 'u') + (otFor(o.nr) ? 'g' : '') +
+                        (o.sms ? SMSVIEW : '') : '',
+          t === 'ivr' || t === 'dg' || t === 'q' || t === 'erg' ? destShows(o) + DIDCOL : '',
           r ? r.keys.length + ':' + (r.hidden ? 1 : 0) : '',
           otFor(numFor(t, o)) ? 1 : 0,
           nodeSub(t, o) ? 1 : 0,
@@ -3044,17 +3729,41 @@ function nodeSize(t, o){
   const measured = SIZED[sizeSig(t, o)];
   if (t !== 'ivr'){
     const rows = portsFor(t, o).filter(p => !p.key).length + (ENDPOINT[t] ? 1 : 0);
-    const est = NB.border + NB.header + (nodeSub(t, o) ? NB.sub : 0) + rows * NB.pr + NB.margin;
-    return { w: 190, h: Math.ceil(measured || est) };
+    let est = NB.border + NB.header + (nodeSub(t, o) ? NB.sub : 0) + rows * NB.pr + NB.margin;
+    const md = destShows(o);
+    if (t === 'did'){
+      const b = didBlockRows(o);
+      est += NB.ctlAdv + b.lines * NB.cnd + (b.rows ? NB.advTop + b.rows * NB.advRow : 0);
+      if (o.sms && SMSVIEW === 'row') est += NB.pr;
+    }
+    if (t === 'dg' || t === 'q' || t === 'erg'){
+      est += NB.ctlAdv;
+      if (md === 'detail'){
+        const n = (t === 'q' ? (o.strategy ? 2 : 1) : 1) + 1 + ((otFor(numFor(t, o)) || {}).closed ? 1 : 0);
+        est += NB.advTop + n * NB.advRow;
+      }
+    }
+    /* a list of names needs room; numbers do not */
+    const wide = (md === 'name' || md === 'detail') && (t === 'dg' || t === 'q' || t === 'erg');
+    return { w: wide ? 230 : 190, h: Math.ceil(measured || est) };
   }
   const r = ivrRows(o);
   const shown = r.keys.length + 1 + (r.hidden ? 1 : 0);
   const horiz = o.orient === 'h';
-  const est = NB.border + NB.header + (nodeSub(t, o) ? NB.sub : 0) + NB.greet + NB.ctl +
+  const mdE = destShows(o);
+  const kh = (!horiz && mdE !== 'off') ? NB.krow2 : NB.krow;
+  const adv = (mdE === 'detail')
+    ? NB.advTop + (2 + ((otFor(o.num) || {}).closed ? 1 : 0)) * NB.advRow : 0;
+  const est = NB.border + NB.header + (nodeSub(t, o) ? NB.sub : 0) + NB.greet +
+              ctlHeight(horiz ? Math.max(190, 26 + shown * 34) : (mdE === 'off' ? 120 : (mdE === 'num' ? 150 : 230))) + adv +
               (otFor(o.num) ? NB.pr : 0) + NB.rowsBorder +
-              (horiz ? NB.kcol : (r.keys.length + 1) * NB.krow + (r.hidden ? NB.more : 0)) +
+              (horiz ? NB.kcol : (r.keys.length + 1) * kh + (r.hidden ? NB.more : 0)) +
               NB.margin;
-  return { w: horiz ? Math.max(190, 26 + shown * 34) : 120,
+  /* a vertical IVR only needs 120px for bare key labels; a destination needs
+     room, and a name needs more. Horizontal is driven by the key count. */
+  const md = destShows(o);
+  const vw = md === 'off' ? 120 : (md === 'num' ? 150 : 230);
+  return { w: horiz ? Math.max(190, 26 + shown * 34) : vw,
            h: Math.ceil(measured || est) };
 }
 
@@ -3149,7 +3858,7 @@ function overlapPairs(){
 }
 
 /* the findings action: move only what is actually overlapping */
-function tidyOverlaps(){
+function tidyOverlaps(quiet){
   let n = 0;
   CV_TYPES.forEach(t => arr(t).forEach(o => {
     if (typeof o.x !== 'number') return;
@@ -3158,7 +3867,8 @@ function tidyOverlaps(){
     o.x = f.x; o.y = f.y; n++;
   }));
   refreshAll();
-  cvFlash(n ? 'Moved ' + n + ' node(s) to clear the overlaps.' : 'Nothing was overlapping.');
+  if (!quiet) cvFlash(n ? 'Moved ' + n + ' node(s) to clear the overlaps.' : 'Nothing was overlapping.');
+  return n;
 }
 
 /* nothing is ever dropped on top of something else */
@@ -3233,8 +3943,10 @@ function drawWires(ghost){
   if (!svg) return;
   const C = wireCols();
   const paths = [];
-  paths.push('<defs><marker id="cvtip" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">' +
-             '<path d="M0,0 L6,3 L0,6 Z" fill="' + C.wire + '"/></marker></defs>');
+  /* an arrowhead cannot inherit its line's stroke reliably, so one marker is
+     minted per colour actually used */
+  const tips = {};
+  const defsAt = paths.push('') - 1;
 
   CV_TYPES.forEach(t => arr(t).forEach(o => {
     portsFor(t, o).forEach(p => {
@@ -3242,9 +3954,23 @@ function drawWires(ghost){
       if (!dot) return;
       const a = centerOf(dot, cv);
       const outDir = dot.getAttribute('data-dir') || 'right';
+      if (!rvShown(t)) return;
       portVals(t, o, p.f).forEach(v => {
         const hit = byNum(v);
         if (!hit) return;
+        if (!rvShown(hit.t)){
+          /* the port row normally names its destination, so nothing is lost by
+             dropping the wire \u2014 except on the Nothing step, where a stub is the
+             only remaining sign that the route exists */
+          if (DESTVIEW === 'off'){
+            const a0 = centerOf(dot, cv);
+            const dir0 = dot.getAttribute('data-dir') || 'right';
+            const dx0 = dir0 === 'down' ? 0 : 26, dy0 = dir0 === 'down' ? 26 : 0;
+            paths.push('<path class="w stub" d="M' + a0.x + ',' + a0.y + ' L' +
+                       (a0.x + dx0) + ',' + (a0.y + dy0) + '" stroke="' + C.wire + '"/>');
+          }
+          return;
+        }
         const tgt = cv.querySelector('.cn[data-id="' + hit.o.id + '"] .in');
         if (!tgt) return;
         const b = centerOf(tgt, cv);
@@ -3259,13 +3985,19 @@ function drawWires(ghost){
           d = 'M' + a.x + ',' + a.y + ' C' + (a.x + dx) + ',' + a.y + ' ' +
               (inDown ? b.x : b.x - dx) + ',' + (inDown ? b.y - dx : b.y) + ' ' + b.x + ',' + b.y;
         }
-        const col = p.ot ? C.ot : C.wire;
+        /* the after-hours wire keeps its amber even when tinting: that colour
+           carries meaning, and a destination hint must not overwrite it.
+           Agents have no SKIN entry, so those wires stay grey. */
+        let col = p.ot ? C.ot : C.wire;
+        if (WIRETINT && !p.ot){ const sk = SKIN[hit.t]; if (sk) col = sk[2]; }
         const key = o.id + '|' + p.f + '|' + v;
         const on  = WSEL && WSEL.key === key;
         const lit = !VIEWSET || (VIEWSET.has(keyOf(t, o)) && VIEWSET.has(hit.t + ':' + v));
         paths.push('<path class="wh" d="' + d + '" data-cut="' + key + '"/>');
+        const stroke = on ? C.red : col;
+        tips[stroke] = 1;                       /* one arrowhead per colour used */
         paths.push('<path class="w' + (on ? ' sel' : '') + (lit ? '' : ' dimw') + '" d="' + d + '" stroke="' +
-                   (on ? C.red : col) + '" marker-end="url(#cvtip)"/>');
+                   stroke + '" marker-end="url(#' + tipId(stroke) + ')"/>');
       });
     });
   }));
@@ -3273,6 +4005,9 @@ function drawWires(ghost){
   if (ghost) paths.push('<path class="w gh" d="M' + ghost.x1 + ',' + ghost.y1 + ' L' + ghost.x2 + ',' + ghost.y2 + '"/>');
   svg.setAttribute('width', cv.style.width);
   svg.setAttribute('height', cv.style.height);
+  paths[defsAt] = '<defs>' + Object.keys(tips).map(c =>
+    '<marker id="' + tipId(c) + '" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">' +
+    '<path d="M0,0 L6,3 L0,6 Z" fill="' + c + '"/></marker>').join('') + '</defs>';
   svg.innerHTML = paths.join('');
 }
 
@@ -3312,7 +4047,8 @@ const CSV_HDR = {
   nr:     ['number','did','did number','dids','nr','nr1','phone','phone number','msisdn','e164'],
   tenant: ['tenant','company','customer','site','account','client'],
   trunk:  ['trunk','provider','carrier','sip trunk'],
-  dest:   ['destination','dest','routes to','route','value','target','goes to']
+  dest:   ['destination','dest','routes to','route','value','target','goes to'],
+  sms:    ['sms','sms enabled','text','texting','sms capable']
 };
 
 function importDIDs(text){
@@ -3331,7 +4067,7 @@ function importDIDs(text){
       if (i > -1) map[k] = i;
     });
   } else {
-    map = { nr: 0, tenant: 1, trunk: 2, dest: 3 };
+    map = { nr: 0, tenant: 1, trunk: 2, dest: 3, sms: 4 };
     start = 0;
   }
   const at = (r, k) => (map[k] == null ? '' : (r[map[k]] || ''));
@@ -3354,7 +4090,9 @@ function importDIDs(text){
       continue;
     }
 
-    const o = { id: uid(), nr: nr, tenant: at(r, 'tenant'), trunk: at(r, 'trunk'), dest: '', val: '' };
+    const smsRaw = String(at(r, 'sms') || '').trim().toLowerCase();
+    const o = { id: uid(), nr: nr, tenant: at(r, 'tenant'), trunk: at(r, 'trunk'), dest: '', val: '',
+                sms: ['y','yes','true','1','on','sms'].indexOf(smsRaw) > -1 };
     const dest = at(r, 'dest'), dnum = dest.replace(/\D/g, '');
     let note = 'added as DID ' + nr;
     if (dnum){
@@ -3397,7 +4135,10 @@ function importDIDs(text){
 const CSV_EXT_HDR = {
   num:   ['number','extension','ext','extension number','ext number','user extension','ext no'],
   name:  ['name','display name','user','full name','description','user name','owner','staff'],
-  email: ['email','e-mail','mail','email address']
+  email: ['email','e-mail','mail','email address'],
+  dept:  ['department','dept','team','group','division','cost centre','cost center'],
+  uad:   ['uad','phone type','phone','device','handset','model','user agent','user agent device'],
+  snet:  ['s-net connect','snet','snet connect','s-net','licence','license','connect licence','connect license']
 };
 
 function guessExtCols(rows){
@@ -3467,7 +4208,8 @@ function importExts(text){
       res.rows.push({ line, cells: r, status: 'bad', note: 'number already used by ' + CV_LABEL[other.t] + ' ' + num });
       continue;
     }
-    const o = { id: uid(), num: num, name: at(r, 'name'), email: at(r, 'email') };
+    const o = { id: uid(), num: num, name: at(r, 'name'), email: at(r, 'email'),
+                dept: at(r, 'dept'), uad: at(r, 'uad'), snet: snetList(at(r, 'snet')) };
     DOC.ext.push(o);
     res.added.push(o);
     res.rows.push({ line, cells: r, status: 'ok', note: 'added as extension ' + num });
@@ -3599,21 +4341,23 @@ const ISPEC = {
       num:      ['number','queue','queue number','num'],
       name:     ['name','description','title'],
       strategy: ['strategy','ring strategy','ringing'],
-      agents:   ['agents','agent','members']
+      agents:   ['agents','agent','members'],
+      timeout:  ['timeout','t/o','max wait destination','timeout destination']
     },
-    multi: ['agents'], kinds: { agents: 'agent' },
+    multi: ['agents'], kinds: { agents: 'agent' }, dests: ['timeout'],
     make: v => ({ id: uid(), num: v.num, name: v.name || '',
-                  strategy: v.strategy || 'ringall', agents: v._agents || [] })
+                  strategy: v.strategy || 'ringall', agents: v._agents || [], timeout: v.timeout || '' })
   },
   erg: {
     label: 'ERGs', arrk: 'erg', num: 'num', digits: /^\d{2,7}$/, atX: () => 300,
     fields: {
       num:  ['number','erg','erg number','num'],
       name: ['name','description','title'],
-      ext:  ['extension','ext','rings','destination']
+      ext:  ['extension','ext','rings','destination'],
+      timeout: ['timeout','t/o','timeout destination']
     },
-    dests: ['ext'], kinds: { ext: 'ext' },
-    make: v => ({ id: uid(), num: v.num, name: v.name || '', ext: v.ext || '' })
+    dests: ['ext','timeout'], kinds: { ext: 'ext' },
+    make: v => ({ id: uid(), num: v.num, name: v.name || '', ext: v.ext || '', timeout: v.timeout || '' })
   },
   conf: {
     label: 'Conferences', sheet: 'Conference',
@@ -3796,19 +4540,19 @@ function reportDetail(res, kind){
    mirror the workbook's positions \u2014 the .xlsx writer handles those. */
 const TEMPLATES = {
   did: ['dids_template',
-    'number,tenant,trunk,destination\n' +
-    '8005551000,Bridgeway,SIP-Main,5000\n' +
-    '8005551001,Bridgeway,SIP-Main,4001\n' +
-    '8005551002,Bridgeway,SIP-Main,3001\n' +
-    '8005551003,Bridgeway,SIP-Main,\n' +
-    '8005551004,Bridgeway,SIP-Backup,\n'],
+    'number,tenant,trunk,destination,sms\n' +
+    '8005551000,Bridgeway,SIP-Main,5000,yes\n' +
+    '8005551001,Bridgeway,SIP-Main,4001,\n' +
+    '8005551002,Bridgeway,SIP-Main,3001,\n' +
+    '8005551003,Bridgeway,SIP-Main,,\n' +
+    '8005551004,Bridgeway,SIP-Backup,,\n'],
 
   ext: ['extensions_template',
-    'number,name,email\n' +
-    '1010,Reception desk,reception@bridgeway.example\n' +
-    '1011,Practice manager,manager@bridgeway.example\n' +
-    '1012,Hygienist room,\n' +
-    '1013,Accounts,accounts@bridgeway.example\n'],
+    'number,name,email,department,uad,s-net connect\n' +
+    '1010,Reception desk,reception@bridgeway.example,Front office,Yealink T54W,Office;Agent\n' +
+    '1011,Practice manager,manager@bridgeway.example,Management,Yealink T54W,Business;Supervisor\n' +
+    '1012,Hygienist room,,Clinical,Yealink T31G,\n' +
+    '1013,Accounts,accounts@bridgeway.example,Finance,Softphone,Mobile\n'],
 
   ivr: ['ivr_template',
     'number,name,greeting,plays,key1,key2,key3,key4,key5,key6,key7,key8,key9,key0,key_star,key_hash,timeout\n' +
@@ -3821,14 +4565,14 @@ const TEMPLATES = {
     '3002,Clinical group,1003;1004;1005,1901\n'],
 
   q: ['queues_template',
-    'number,name,strategy,agents\n' +
-    '4001,Appointments,ringall,2001;2002\n' +
-    '4002,Billing,leastrecent,2003\n'],
+    'number,name,strategy,agents,timeout\n' +
+    '4001,Appointments,ringall,2001;2002,1900\n' +
+    '4002,Billing,leastrecent,2003,\n'],
 
   erg: ['erg_template',
-    'number,name,extension\n' +
-    '6001,Reception ERG,1001\n' +
-    '6002,Manager ERG,1002\n'],
+    'number,name,extension,timeout\n' +
+    '6001,Reception ERG,1001,1900\n' +
+    '6002,Manager ERG,1002,\n'],
 
   conf: ['conference_template',
     'number,name\n' +
@@ -4428,6 +5172,29 @@ function initCanvas(){
       return;
     }
 
+    /* o.adv is the per-node override: true = full detail, false = simple,
+       absent = follow the View menu. Clicking a lit button clears it. */
+    const ovr = e.target.closest('[data-adv],[data-simple]');
+    if (ovr){
+      const wantDetail = ovr.hasAttribute('data-adv');
+      const id = ovr.getAttribute(wantDetail ? 'data-adv' : 'data-simple');
+      const o = ['dids','ivr','dg','q','erg'].reduce((f, k) =>
+        f || (DOC[k] || []).find(x => x.id === id), null);
+      if (o){
+        const now = destShows(o);
+        const already = wantDetail ? (now === 'detail') : (now === 'num');
+        if (already) delete o.adv;                 /* back to following the menu */
+        else o.adv = wantDetail;
+        SIZED = {};
+        drawCanvas();
+        const moved = tidyOverlaps(true);
+        if (moved) drawCanvas();
+        cvFlash(already ? 'Following the View menu again.'
+                        : (wantDetail ? 'Full detail for this one.' : 'Simple view for this one.'));
+      }
+      return;
+    }
+
     const ot = e.target.closest('[data-ot]');
     if (ot){
       const id = ot.getAttribute('data-ot');
@@ -4531,12 +5298,22 @@ function initCanvas(){
   const closeView = () => vm.classList.remove('show');
   vb2.addEventListener('click', e => { e.stopPropagation(); vm.classList.toggle('show'); });
   vm.addEventListener('click', e => {
+    if (e.target.closest('[data-rvall]')){ setRouting('*', true); return; }
+    if (e.target.closest('[data-rvnone]')){ setRouting('*', false); return; }
     const sd = e.target.closest('[data-side]');
     if (!sd) return;
     setPanelSide(sd.getAttribute('data-side'));
     cvFlash('Panel moved to the ' + PSIDE + '.');
   });
   vm.addEventListener('change', e => {
+    if (e.target.id === 'didViewSel'){ setDestView(e.target.value); return; }
+    if (e.target.id === 'didColSel'){ setDidCol(e.target.value); return; }
+    if (e.target.id === 'smsViewSel'){ setSmsView(e.target.value); return; }
+    if (e.target.id === 'formLaySel'){ setFormLay(e.target.value); return; }
+    if (e.target.id === 'rvDimChk'){ setRvDim(e.target.checked, true); return; }
+    const rv = e.target.closest('[data-rv]');
+    if (rv){ setRouting(rv.getAttribute('data-rv'), rv.checked); return; }
+    if (e.target.id === 'wireTintChk'){ setWireTint(e.target.checked, true); return; }
     if (e.target.id === 'autoFitChk'){ setAutoFit(e.target.checked, true); return; }
     const g = e.target.getAttribute('data-guard');
     if (g){
@@ -4560,6 +5337,35 @@ function initCanvas(){
 
   const eb2 = $('cvEmpty');
   if (eb2) eb2.addEventListener('click', e => { if (e.target.closest('#emptySample')) loadSample(); });
+
+  const dvs = $('didViewSel');
+  if (dvs){
+    dvs.innerHTML = DESTVIEWS.map(v =>
+      '<option value="' + v[0] + '" title="' + esc(v[2]) + '">' + esc(v[1]) + '</option>').join('');
+    dvs.value = DESTVIEW;
+  }
+  const fls = $('formLaySel');
+  if (fls){
+    fls.innerHTML = FORMLAYS.map(v =>
+      '<option value="' + v[0] + '" title="' + esc(v[2]) + '">' + esc(v[1]) + '</option>').join('');
+    fls.value = FORMLAY;
+  }
+  const svs = $('smsViewSel');
+  if (svs){
+    svs.innerHTML = SMSVIEWS.map(v =>
+      '<option value="' + v[0] + '" title="' + esc(v[2]) + '">' + esc(v[1]) + '</option>').join('');
+    svs.value = SMSVIEW;
+  }
+
+  const dcs = $('didColSel');
+  if (dcs){
+    dcs.innerHTML = DIDCOLS.map(v =>
+      '<option value="' + v[0] + '" title="' + esc(v[2]) + '">' + esc(v[1]) + '</option>').join('');
+    dcs.value = DIDCOL;
+  }
+
+  const rc = $('rvChip');
+  if (rc) rc.addEventListener('click', () => setRouting('*', true));
 
   const td = $('tplDl'); if (td) td.addEventListener('click', exportTemplate);
   const wd = $('wbDl');  if (wd) wd.addEventListener('click', exportXlsx);
@@ -4973,6 +5779,15 @@ function restorePanel(){
   setZoom(typeof v.zoom === 'number' ? v.zoom : 1, true);
   if (CVIEW.tab !== 'all' && CVIEW.tab !== 'unrouted' && !DOC.dids.some(d => d.nr === CVIEW.tab))
     CVIEW.tab = 'all';
+  /* destview is the current key; didview is what older projects wrote */
+  setDestView((DOC.meta && (DOC.meta.destview || DOC.meta.didview)) || 'name', true);
+  setDidCol((DOC.meta && DOC.meta.didcol) || 'tint', true);
+  setSmsView((DOC.meta && DOC.meta.smsview) || 'row', true);
+  setFormLay((DOC.meta && DOC.meta.formlay) || 'rows', true);
+  RVHIDE = {};
+  ((DOC.meta && DOC.meta.rvhide) || []).forEach(t => { if (RV_TYPES.indexOf(t) > -1) RVHIDE[t] = true; });
+  setRvDim(!DOC.meta || DOC.meta.rvdim !== false);
+  setWireTint(!DOC.meta || DOC.meta.wiretint !== false);
   setAutoFit(!DOC.meta || DOC.meta.autofit !== false);
   const q = (DOC.meta && DOC.meta.panel) || {};
   setPanelSide(q.side === 'right' ? 'right' : 'left');
@@ -5025,6 +5840,218 @@ document.addEventListener('DOMContentLoaded', () => {
 
 Versions below cover the work recorded in this build; entries before 0.22 were
 not kept in-app and are not reconstructed here.
+
+## [0.57.0]
+### Added
+- **Grey out empty types**, on by default, in the Routing view. A type the flow
+  has none of is dimmed, reads *none* and cannot be ticked, so the list shows
+  what the flow actually contains. Unticking them instead would have made the
+  summary claim things were hidden when nothing was, and the first object you
+  added of that type would never have appeared. The switch turns it off for
+  anyone who wants the full list regardless.
+- A type that is deliberately hidden is never dimmed, even when empty, so it can
+  always be ticked back on.
+
+## [0.56.0]
+### Added
+- **Routing view** in the View menu: a checkbox per routing type \u2014 IVR, dial
+  group, queue, ERG, voicemail, conference and agent \u2014 with the object's own
+  colour and how many of them exist, plus All and None. DIDs and extensions are
+  not listed: they are the two ends of every route.
+- Hidden types are removed from the drawing rather than faded, since Focus
+  already fades and two kinds of dimming cannot be told apart. Nothing moves, so
+  ticking a box back restores the picture exactly.
+- The setting saves with the project, and whenever anything is hidden a chip
+  appears on the canvas saying so, listing what and restoring everything in one
+  click. Without it a shared file could show half a flow and look complete.
+- Hiding a queue greys the Agent row, which explains that its agents would have
+  nothing visible to hang from.
+### Note
+- This changes the picture only. The export, the findings and the traced map all
+  still see every object.
+
+## [0.55.0]
+### Changed
+- **S-NET Connect takes more than one licence**: Mobile, Office, Business,
+  Agent and Supervisor, as a two-column checkbox grid with a count in the label.
+- The value is stored as a list and written to the workbook as `Office; Agent`,
+  read back the same way. A value that is not one of the five \u2014 anything typed
+  in before, or an unfamiliar import \u2014 is kept and shown as a greyed entry
+  rather than dropped, so an import cannot silently lose it.
+## [0.54.0]
+### Changed
+- **Inspector fields are one per row**, with the label beside the input. The
+  panel is 340px, so three across left 78px of text room and cut off both a
+  phone model and an email address. Labels now line up into a column, and the
+  form is about a third shorter than stacking the labels above would be.
+### Added
+- **Inspector fields** in the View menu, offering **Two across** for anyone who
+  wants the shorter form. A long value is still truncated there, which is why it
+  is not the default. One class on the form container drives both shapes, so no
+  form markup changed \u2014 pick lists, checkboxes and the IVR key grid keep their
+  own arrangements.
+
+## [0.53.0]
+### Added
+- **Department, Phone type (UAD) and S-NET Connect** on an extension: three
+  fields in the Inspector, importable from CSV under the usual aliases, in the
+  CSV template, and written as trailing columns on the Extension sheet. That
+  sheet is read by position and stops at MAC, so the extra columns travel
+  without disturbing the Map Creator \u2014 verified by round trip.
+
+## [0.52.0]
+### Added
+- **SMS marker** in the View menu: a pill in the subtitle, **its own row (the
+  default)**, an edge stripe with a header badge, or not shown at all. Teal
+  throughout, so it cannot be mistaken for an Operation Times gate or for
+  something broken. Only the row option costs height, and the estimate accounts
+  for it, so the layout guards stay accurate.
+
+## [0.51.0]
+### Added
+- **SMS on a DID** \u2014 a checkbox in the Inspector, shown on the node beside the
+  tenant and trunk, importable from an `sms` column (`yes`, `y`, `true`, `1`).
+### Changed
+- **Tenant and trunk are no longer editable in the Inspector.** Both are still
+  held, still imported and still written to the DID routing sheet, so a round
+  trip is unchanged \u2014 but a DID created in the builder can no longer be given a
+  trunk, and PBXware needs one.
+### Note
+- A real DID routing sheet has no SMS column, so the flag travels in the project
+  file and the CSV, not the workbook.
+
+## [0.50.1]
+### Changed
+- The sample flow now covers two destination types it never reached: a **DID
+  straight to a dial group** with no menu in front of it, and a **conference
+  bridge**, published on its own line and on a menu key so the same object is
+  reached two ways. The queue also gained the timeout it was missing, which was
+  showing red in the detail view.
+
+## [0.50.0]
+### Added
+- **The destination scale now drives every port row on every type**, not just
+  DIDs and IVR keys. A dial group reads `rings Extension 1001 Reception desk`,
+  a queue's timeout and a ring group's extension name what they reach, and the
+  after-hours row names its target wherever a gate exists.
+- **Dial groups, queues and ring groups get the S and i buttons** and a full
+  detail block: what it rings or how many agents, the strategy, the timeout and
+  the after-hours path, each reddened when unset.
+- They widen from 190px to 230px at the name and detail steps, where a list of
+  names needs the room, and stay at 190px below that.
+### Changed
+- A port keeps its own word: a ring group reads `rings 1001`, not `\u2192 1001`.
+  Only a DID's routes-to uses the bare arrow, and only the after-hours row uses
+  the clock \u2014 the duplicated "after hours" tail is gone, since the clock
+  already says it.
+
+## [0.49.4]
+### Changed
+- On an IVR the **closed** row now sits below the keys rather than above them.
+  It is the after-hours fallback, so showing it first read as though it came
+  first. Every other type is unchanged \u2014 their closed row was already last.
+
+## [0.49.3]
+### Changed
+- **S now means "number only", not "nothing".** Stripping the destination out
+  entirely left the node saying where none of its keys go, which is the thing it
+  exists to show. It also puts the node at 150px rather than 120px, where the
+  control strip fits on one line without wrapping. The View menu keeps a true
+  **Nothing** step for anyone who wants bare labels.
+
+## [0.49.2]
+### Fixed
+- In simple view the IVR's collapse button sat outside the node. The control
+  strip needs 150px for five buttons and simple view is 120px wide; it fitted
+  before only because there were three. The strip now wraps, so it cannot
+  overflow at any width, zoom or font size, and the gap and padding are tighter
+  so the wider views still keep it on one line. The height estimate knows when
+  it wraps, so the layout guards stay accurate.
+
+## [0.49.1]
+### Added
+- **S for simple** on the IVR and the DID, beside the existing **i**. S strips
+  that node back to bare labels whatever the View menu says; i gives it full
+  detail. Clicking a lit button clears the override, so the node follows the
+  menu again \u2014 previously a second click on **i** silently meant "simple",
+  which was the wrong thing for the only button available to say it.
+
+## [0.49.0]
+### Changed
+- **One destination scale for both node types.** The setting now says how *much*
+  to show rather than *where*: **Nothing / Number only / Number and name (the
+  default) / Full detail**. Each type places it where it fits \u2014 a DID on its
+  routes-to and closed rows, an IVR on its key rows \u2014 and the closed row is
+  included whenever a gate exists instead of being a mode of its own.
+- **IVR key rows now carry their destination**, tinted by the same Destination
+  colour setting. A vertical IVR widens only as far as the step needs: 120px
+  bare, 150px for numbers, 230px with names. Horizontal keys are 34px columns,
+  so they take the colour and no text at any step.
+- **Full detail adds an IVR summary**: keys used, timeout (red when unset, since
+  silent callers drop), and the after-hours path.
+- The per-node **i** override now works on IVRs as well as DIDs.
+- Changing the scale now tidies any overlaps it causes. Every node changes size
+  because of a global switch rather than anything the person did, so the app
+  clears up after itself instead of leaving collisions on the canvas.
+- Projects saved with the old five modes are migrated: `row`, `both` and `line`
+  all become **Number and name**; `off` and `detail` map straight across.
+
+## [0.48.1]
+### Changed
+- Defaults now show the routing rather than hiding it: DID destinations **On
+  both rows**, destination colour **Tinted**, and **Colour the wires** on. All
+  three still switch off in the View menu, and a project saved with different
+  settings keeps them.
+
+## [0.48.0]
+### Added
+- **Destination colour** in the View menu: no colour, **tinted (the default)**,
+  left stripe, or a swatch of the destination node. Applies wherever a DID shows
+  its destination \u2014 the port rows, the destination line and the detail block.
+- **Colour the wires**, a toggle: each wire takes its destination's colour
+  instead of one grey. Off by default. Arrowheads are minted per colour, since
+  a marker cannot reliably inherit its line's stroke. After-hours wires keep
+  their amber, because that colour means something and a destination hint must
+  not overwrite it.
+### Note
+- The palette holds six colours for nine types: `ivr`, `dg` and `vm` share one
+  green. Colour is a hint, not an identifier \u2014 the label stays precise. Giving
+  them distinct colours would disagree with the Map Creator's own output.
+
+## [0.47.1]
+### Changed
+- "Destination and hours" now writes into the port rows rather than adding two
+  pills above them. The pills were inset 16px against the rows' 12px, so they
+  never lined up; those rows already mean "routes to" and "closed", so putting
+  the destination in them removes a duplicate instead of aligning one. It also
+  costs no height, which matters now auto-fit rescales for taller nodes.
+  Renamed to **On both rows**. An unresolvable destination reddens the label.
+
+## [0.47.0]
+### Added
+- **DID destinations on the node.** A DID said its number, tenant and trunk but
+  never where it went \u2014 the wire was the only answer, which does not scale to
+  forty DIDs. **View \u203a DID destinations** offers five modes: nothing, a
+  destination line, on the routes-to row, **full detail (the default)**, or
+  destination plus after-hours. Full detail shows the first hop, the
+  after-hours path, the hours and how many objects the DID reaches.
+- Per node, an **i** button overrides the menu either way, so one DID can be
+  opened up on an otherwise quiet canvas, or closed on a detailed one.
+- An unrouted DID, a destination that does not exist, a gate with no closed
+  path and a DID reaching nothing all show in red.
+
+## [0.46.0]
+### Added
+- **Timeout destinations on queues and ERGs**: a `t/o` port on the node, a field
+  in the Inspector, importable from CSV, carried through renumbering, and shown
+  in the traced preview. The ERG sheet gains a trailing Timeout column the
+  mapper ignores. The Queues sheet deliberately does not: the mapper reads
+  member pairs from column E to the end of the row, so a trailing cell comes
+  back as a phantom agent \u2014 caught by round-trip. A queue's timeout travels in
+  the project file and the CSV instead.
+### Changed
+- The dial group's no-answer port is labelled `t/o` like every other timeout;
+  it was always PBXware's Last Destination.
 
 ## [0.45.0]
 ### Fixed
