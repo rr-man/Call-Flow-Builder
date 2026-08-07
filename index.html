@@ -93,7 +93,7 @@ code{font:12px/1.4 ui-monospace,Consolas,monospace;background:var(--code-bg);pad
   display:flex; align-items:center; gap:14px; flex-wrap:wrap;
   border-bottom:3px solid var(--amber);
 }
-#banner h1{color:#fff;font-size:16px;letter-spacing:.2px}
+#banner h1{color:rgba(255,255,255,.72);font-size:13.5px;font-weight:600;letter-spacing:.2px}
 /* sits directly under the flow canvas, inside its column, so it reads as part
    of the tool rather than as page furniture */
 #credits{
@@ -280,12 +280,29 @@ code{font:12px/1.4 ui-monospace,Consolas,monospace;background:var(--code-bg);pad
   background:#fff;border-radius:6px;padding:5px 8px;margin-right:2px;
 }
 .brand img{display:block;height:22px;width:auto}
-.pname{
-  width:184px;flex:none;padding:6px 10px;border-radius:7px;font:inherit;font-size:12.5px;
-  font-weight:600;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.24);color:#fff;
+/* the project name drives every filename the tool writes, so it is the loudest
+   thing in the banner: bigger than the tool's own title, on a lighter field,
+   with an amber edge. Placeholder is white at 72% \u2014 the lower alphas looked
+   right but measured 3.25 against the field, below AA. */
+.pnwrap{position:relative;display:flex;align-items:center;flex:0 1 250px;min-width:150px}
+.pnwrap:before{
+  content:'';position:absolute;left:0;top:5px;bottom:5px;width:3px;
+  background:var(--amber);border-radius:3px;
 }
-.pname::placeholder{color:rgba(255,255,255,.5);opacity:1}
-.pname:focus{outline:2px solid var(--amber);outline-offset:-1px;background:rgba(255,255,255,.16)}
+.pname{
+  width:100%;padding:7px 11px 7px 14px;border-radius:7px;font:inherit;font-size:14px;
+  font-weight:700;letter-spacing:.2px;
+  background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;
+}
+.pname::placeholder{color:rgba(255,255,255,.72);opacity:1;font-weight:600}
+.pname:hover{background:rgba(255,255,255,.26)}
+.pname:focus{
+  outline:2px solid var(--amber);outline-offset:-1px;
+  background:rgba(255,255,255,.26);
+}
+/* unnamed is a state worth showing: it is what every download will be called */
+.pnwrap.unnamed .pname{border-style:dashed;border-color:rgba(224,168,0,.75)}
+@media (max-width:900px){.pnwrap{flex-basis:170px}}
 .vb.on{background:var(--surface);color:var(--head);border-color:var(--surface)}
 
 /* ── Forms is hidden for now ──────────────────────────────────────────────
@@ -636,6 +653,9 @@ body.zen #expandBtn{background:var(--navy);border-color:var(--navy);color:#fff}
 .cnadv .r{display:flex;gap:6px;font-size:10px;line-height:1.7}
 .cnadv .k{color:var(--faint2);min-width:62px;flex:none}
 .cnadv .v{color:var(--ink);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* a row of chips must wrap: clipping it is worse than an ellipsis, because a cut
+   chip still looks like a whole chip and nothing says a licence is missing */
+.cnadv .r.chips .v{white-space:normal;overflow:visible;text-overflow:clip;display:flex;flex-wrap:wrap}
 .cnadv .v.bad{color:var(--red-d)}
 .pr .pn.bad{color:var(--red-d);font-weight:600}
 /* SMS is a property of the number, not a route \u2014 so it gets a marker of its
@@ -728,6 +748,11 @@ body.zen #expandBtn{background:var(--navy);border-color:var(--navy);color:#fff}
   margin-right:5px;vertical-align:-1px;flex:none;
 }
 .seg.adv{font-size:9px;letter-spacing:.3px;font-style:italic}
+.seg.adv.hdr{
+  margin-left:auto;padding:0 5px;line-height:1.4;
+  background:rgba(255,255,255,.55);border-color:var(--line);
+}
+.seg.adv.hdr.on{background:var(--navy);border-color:var(--navy);color:#fff}
 .vsel{
   margin-left:auto;padding:3px 6px;font:inherit;font-size:11.5px;font-weight:600;
   border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);
@@ -817,6 +842,55 @@ body.zen #expandBtn{background:var(--navy);border-color:var(--navy);color:#fff}
 .vitem b{display:block;font-size:12.5px;font-weight:600;color:var(--ink)}
 .vitem i{display:block;font-size:11px;color:var(--mute);line-height:1.45;margin-top:1px;font-style:normal}
 .cn.badpos{outline:2px solid var(--red);outline-offset:1px}
+/* two local destinations on one number. A stripe rather than an outline: the
+   selection ring is also 2px, and the two together read as one thick smear. */
+/* Five tints of the extension's own blue, lightest to deepest, one dark ink
+   throughout. Five separate hues was the obvious idea and the measurements
+   killed it: every candidate sat within 31-62 of a colour already meaning DID,
+   ERG or queue. A single-hue ramp with one text colour also failed \u2014 the
+   middle step read 3.15 on white and 2.74 on dark ink. Light tints clear AA at
+   every step, 9.86 down to 5.58. */
+:root{
+  /* the ranking lives in the BORDER, not the fill. The first version tinted the
+     fill, and the palest step came out #eef4fb \u2014 byte-identical to the
+     extension node's own background, so Mobile was invisible and the deeper
+     licences appeared to shout over it. A line only has to be seen, not to
+     carry text, so it can range far wider than a fill can while one ink stays
+     legible on every chip. */
+  --lic1:#a8cbe8; --lic2:#7db0dc; --lic3:#5295cf; --lic4:#2f76b4; --lic5:#1d5285;
+  --lic-fill:#ffffff; --lic-ink:#12405f;
+  --uad-hw:#eceff4;  --uad-hw-ink:#37474f;
+  --uad-sp:#e4f5f7;  --uad-sp-ink:#0e5c68;
+}
+/* re-derived rather than reused: the light tints measure 11-12 against the dark
+   surface and would glow */
+[data-theme="dark"]{
+  --lic1:#3f6588; --lic2:#4f7ea6; --lic3:#6098c4; --lic4:#71b1e0; --lic5:#8fc6ee;
+  --lic-fill:#16232f; --lic-ink:#dbeaf8;
+  --uad-hw:#2c3742;  --uad-hw-ink:#c2ccd6;
+  --uad-sp:#123c44;  --uad-sp-ink:#96d4e0;
+}
+.lch{
+  display:inline-flex;border-radius:20px;padding:1px 6px;margin:1px 2px 1px 0;
+  font-size:9px;font-weight:700;white-space:nowrap;
+  background:var(--lic-fill);color:var(--lic-ink);border:1.5px solid var(--lic1);
+}
+.lch.l1{border-color:var(--lic1)} .lch.l2{border-color:var(--lic2)} .lch.l3{border-color:var(--lic3)}
+.lch.l4{border-color:var(--lic4)} .lch.l5{border-color:var(--lic5)}
+.lch.lx{background:transparent;border:1px dashed var(--line);color:var(--faint2);font-style:italic}
+.uch{
+  display:inline-flex;align-items:center;gap:3px;border-radius:5px;padding:1px 6px;
+  font-size:9px;font-weight:700;background:var(--uad-hw);color:var(--uad-hw-ink);white-space:nowrap;
+}
+.uch.soft{background:var(--uad-sp);color:var(--uad-sp-ink)}
+.cn.dupnum{box-shadow:inset 4px 0 0 var(--red), 0 1px 3px var(--shadow1)}
+.cn.dupnum .cnt{color:var(--red)}
+.cn.dupnum.sel{box-shadow:inset 4px 0 0 var(--red), 0 0 0 2px var(--blue), 0 2px 8px var(--shadow2)}
+.f a.jump{color:var(--red);font-weight:700;text-decoration:underline;cursor:pointer}
+.f a.jump:hover{background:rgba(192,57,43,.12);border-radius:3px}
+.cn.flash{animation:cnflash .9s ease}
+@keyframes cnflash{0%,40%{box-shadow:0 0 0 3px var(--amber)}100%{box-shadow:0 1px 3px var(--shadow1)}}
+@media (prefers-reduced-motion:reduce){.cn.flash{animation:none}}
 .vrow{display:flex;align-items:center;gap:9px;padding:7px 10px}
 .vrow b{font-size:12.5px;font-weight:600;color:var(--ink)}
 .seg2{display:flex;margin-left:auto}
@@ -949,11 +1023,13 @@ body.zen #expandBtn{background:var(--navy);border-color:var(--navy);color:#fff}
 <div id="banner">
   <span class="brand"><img src="data:image/png;base64,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" alt="coeo" width="75" height="22"></span>
   <h1>PBXware Call Flow Builder</h1>
-  <button class="chip" id="verBtn" onclick="showLog()" title="View the changelog">v0.57.0</button>
+  <button class="chip" id="verBtn" onclick="showLog()" title="View the changelog">v0.60.0</button>
   <button class="vb on" data-v="canvas">Canvas</button><button class="vb" data-v="forms">Forms</button>
   <span class="spacer"></span>
-  <input id="projName" class="pname" type="text" maxlength="80" placeholder="Untitled flow"
-         title="The project name. Used for every file this tool writes \u2014 .json, .xlsx, .png and .zip.">
+  <span class="pnwrap unnamed" id="pnWrap">
+    <input id="projName" class="pname" type="text" maxlength="80" placeholder="Name this flow"
+           title="The project name. Used for every file this tool writes \u2014 .json, .xlsx, .png and .zip.">
+  </span>
   <button class="tb" id="themeBtn" onclick="toggleTheme()" title="Switch between light and dark">&#9789; Dark</button>
   <button class="tb" onclick="newDoc()">New</button>
   <button class="tb" onclick="loadSample()">Sample flow</button>
@@ -1419,10 +1495,14 @@ function seedDoc(){
     'Key 4 is the Monday briefing bridge. Same conference as 1005, reached both ways.\n\n' +
     'After-hours mailbox is shared at their request. Do not split without asking first.';
   d.ext = [
-    { id: uid(), num: '1001', name: 'Reception desk' },
-    { id: uid(), num: '1002', name: 'Practice manager' },
-    { id: uid(), num: '1003', name: 'Hygienist room' },
-    { id: uid(), num: '1004', name: 'Accounts' }
+    { id: uid(), num: '1001', name: 'Reception desk',   dept: 'Front office',
+      uad: 'Yealink T54W', snet: ['Office','Agent'] },
+    { id: uid(), num: '1002', name: 'Practice manager', dept: 'Management',
+      uad: 'Yealink T54W', snet: ['Business','Supervisor'] },
+    { id: uid(), num: '1003', name: 'Hygienist room',   dept: 'Clinical',
+      uad: 'Yealink T31G', snet: [] },
+    { id: uid(), num: '1004', name: 'Accounts',         dept: 'Finance',
+      uad: 'Softphone',    snet: ['Mobile'] }
   ];
   d.vm = [
     { id: uid(), num: '1900', name: 'General mailbox' },
@@ -1851,6 +1931,36 @@ function drawList(){
 }
 
 /* per-object warning shown in the list, so problems are visible before you click in */
+/* Every local destination shares one number space: PBXware resolves by number
+   alone, so if two of them carry 4001 only one can ever be reached. Conferences
+   and agents were missing from the old check, and two objects of the SAME type
+   sharing a number were not caught at all \u2014 two queues on 4001 is just as
+   broken as a queue and a mailbox. */
+const DUP_TYPES = ['ivr','dg','q','erg','ext','vm','conf','agent'];
+/* recomputed once per draw rather than per node: objIssue runs for every
+   object, and rebuilding the map inside it would be quadratic */
+let DUPS = {};
+
+function dupNums(){
+  const by = {};
+  DUP_TYPES.forEach(t => arr(t).forEach(o => {
+    const n = o[TYPES[t === 'agent' ? 'agent' : t].num];
+    if (!n) return;
+    (by[n] = by[n] || []).push({ t: t, o: o });
+  }));
+  const out = {};
+  Object.keys(by).forEach(n => { if (by[n].length > 1) out[n] = by[n]; });
+  return out;
+}
+/* id -> the other objects sharing its number */
+function dupMap(){
+  const m = {}, d = dupNums();
+  Object.keys(d).forEach(n => d[n].forEach(x => {
+    m[x.o.id] = { num: n, others: d[n].filter(y => y.o !== x.o) };
+  }));
+  return m;
+}
+
 function objIssue(t, o){
   if (t === 'did'  && !o.val) return 'No destination set';
   if (t === 'ivr'){
@@ -1862,6 +1972,14 @@ function objIssue(t, o){
   if (t === 'q'  && !(o.agents  || []).length) return 'No agents \u2014 callers queue forever';
   if (t === 'ot' && !o.closed) return 'No closed-hours destination';
   if (t === 'erg' && !o.ext) return 'No extension set';
+  const dm = DUPS[o.id];
+  if (dm){
+    const names = dm.others.map(x => CV_LABEL[x.t] + ' ' + dm.num);
+    const list = names.length > 1 ? names[0] + ' and ' + (names.length - 1) + ' other' +
+                 (names.length > 2 ? 's' : '') : names[0];
+    return 'Duplicate local destination number \u2014 ' + dm.num + ' is also ' + list +
+           '. PBXware resolves by number, so one of these is unreachable.';
+  }
   return '';
 }
 
@@ -1987,6 +2105,7 @@ function drawForm(){
    step with what you just typed. */
 
 function refreshRight(){
+  DUPS = dupMap();
   drawRoutingView();
   const M = toModel();
 
@@ -2039,15 +2158,16 @@ function drawFindings(M){
   let h = '';
 
   /* duplicate numbers — a builder can catch these; a spreadsheet cannot */
-  const seen = {}, dupes = [];
-  ['ivr','dg','q','erg','ext','vm'].forEach(t => arr(t).forEach(o => {
-    const n = o[TYPES[t].num]; if (!n) return;
-    if (seen[n] && seen[n] !== t) dupes.push(n + ' (' + TYPES[seen[n]].label + ' and ' + TYPES[t].label + ')');
-    seen[n] = t;
-  }));
-  if (dupes.length)
-    h += '<div class="f bad"><h4>\u2716 Number used twice</h4><p>' + esc(dupes.join(' \u00b7 ')) +
-         '. PBXware resolves by number, so one of these is unreachable.</p></div>';
+  const dn = dupNums();
+  const dnKeys = Object.keys(dn);
+  if (dnKeys.length){
+    h += '<div class="f bad"><h4>\u2716 Duplicate local destination number</h4><p>' +
+      dnKeys.map(n => '<b>' + esc(n) + '</b> \u2014 ' +
+        dn[n].map(x => '<a class="jump" data-jump="' + x.t + ':' + x.o.id + '">' +
+                       esc(CV_LABEL[x.t] + ' ' + n) + '</a>').join(' and ')).join('<br>') +
+      '.<br>PBXware resolves by number, so only one of each pair can ever be reached. ' +
+      'Click a name to go to it.</p></div>';
+  }
 
   /* routing objects and endpoints are split, because an unreached one means
      something different in each case: unused routing is usually a mistake, an
@@ -2677,16 +2797,27 @@ function delObj(){
 }
 
 function dupObj(){
-  const o = find(SEL.type, SEL.id);
+  const t = SEL.type;
+  const o = find(t, SEL.id);
   if (!o) return;
   const c = JSON.parse(JSON.stringify(o));
   c.id = uid();
-  const T = TYPES[SEL.type];
-  if (T.base) c[T.num] = nextNum(SEL.type);
+  const T = TYPES[t];
+  if (T.base) c[T.num] = nextNum(t);
   else if (T.num === 'nr') c.nr = '';
-  arr(SEL.type).push(c);
-  SEL.id = c.id;
-  refreshAll();
+  /* the copy carried the original's coordinates, so it landed on the same pixel:
+     invisible, and an overlap the person did not cause */
+  if (typeof o.x === 'number'){
+    const p = spotRightOf(t, o, c.id);
+    c.x = p.x; c.y = p.y;
+  }
+  arr(t).push(c);
+  /* dupObj used to refresh the panel but never redraw the canvas, so nothing
+     appeared to happen at all. Going to the copy does both, and says so. */
+  jumpToNode(t, c.id);
+  const n = numFor(t, c) || c.nr;
+  cvFlash('Duplicated ' + CV_LABEL[t] + ' ' + (numFor(t, o) || o.nr || '') +
+          (n ? ' as ' + n + '.' : '. Give it a number.'));
 }
 
 function init(){
@@ -3097,6 +3228,42 @@ function ivrBlock(o){
   return h + '</div>';
 }
 
+/* the licence ramp runs in licence order, so the colour carries the same
+   meaning as the position. Colour is never the only signal \u2014 at 9px it is
+   small, and a blue ramp is exactly what a colour-blind reader struggles with,
+   so every chip keeps its full name. */
+function licChips(v){
+  const list = snetList(v);
+  if (!list.length) return '<span class="lch lx">no licence</span>';
+  return list.map(x => {
+    const i = SNET_OPTS.indexOf(x);
+    return '<span class="lch ' + (i < 0 ? 'lx' : 'l' + (i + 1)) + '" title="' +
+      esc(i < 0 ? x + ' \u2014 not one of the standard licences' : x) + '">' + esc(x) + '</span>';
+  }).join('');
+}
+
+/* two states rather than a colour per vendor, matched on the words people
+   actually type. Anything unrecognised is a handset, the safer guess. */
+function uadChip(v){
+  const t = String(v || '').trim();
+  if (!t) return '<span class="uch" style="opacity:.55">not set</span>';
+  const soft = /soft|app\b|webrtc|mobile|teams|browser|client/i.test(t);
+  return '<span class="uch' + (soft ? ' soft' : '') + '" title="' +
+    esc(t + (soft ? ' \u2014 a software client' : ' \u2014 a desk handset')) + '">' +
+    (soft ? '\u2601' : '\u260e') + ' ' + esc(t) + '</span>';
+}
+
+/* an extension has no destination, so its detail is what is plugged in and what
+   it is licensed for */
+function extBlock(o){
+  if (destShows(o) !== 'detail') return '';
+  let h = '<div class="cnadv">';
+  if (o.dept) h += '<div class="r"><span class="k">Dept</span><span class="v">' + esc(o.dept) + '</span></div>';
+  h += '<div class="r"><span class="k">Phone</span><span class="v">' + uadChip(o.uad) + '</span></div>';
+  h += '<div class="r chips"><span class="k">Licence</span><span class="v">' + licChips(o.snet) + '</span></div>';
+  return h + '</div>';
+}
+
 function didBlock(o){
   const md = didShows(o);
   /* 'row' and 'both' write into the port rows themselves \u2014 see portLabel \u2014
@@ -3317,6 +3484,29 @@ const setDidView = setDestView;
    Hidden types are removed from the drawing rather than faded: Focus already
    fades, and two kinds of dimming on one canvas cannot be told apart. Nothing
    moves, so ticking a box back restores the picture exactly. */
+/* select an object and bring it into view, wherever the canvas is scrolled */
+function jumpToNode(t, id){
+  const o = find(t === 'agent' ? 'agent' : t, id);
+  if (!o) return;
+  if (!CVMODE) setView('canvas');
+  if (RVHIDE[t]) setRouting(t, true, true);      /* no point jumping to something hidden */
+  if (CVIEW.tab !== 'all') setView2('all', null);
+  SEL = { type: t, id: id };
+  CVSEL = id;                       /* ring it on the canvas, not just in the panel */
+  setPanelTab('ins', true);
+  refreshAll();
+  drawCanvas();
+  const el = document.querySelector('.cn[data-id="' + id + '"]');
+  const sc = $('cvscroll');
+  if (el && sc){
+    sc.scrollLeft = Math.max(0, (o.x || 0) * ZOOM - sc.clientWidth / 2 + 95);
+    sc.scrollTop  = Math.max(0, (o.y || 0) * ZOOM - sc.clientHeight / 2 + 60);
+    el.classList.add('flash');
+    setTimeout(() => el.classList.remove('flash'), 950);
+  }
+  cvFlash('Selected ' + CV_LABEL[t] + ' ' + (numFor(t, o) || o.nr || ''));
+}
+
 function drawRvChip(){
   const c = $('rvChip');
   if (!c) return;
@@ -3472,6 +3662,7 @@ function nodeSub(t, o){
 function drawCanvas(){
   const cv = $('canvas');
   if (!cv) return;
+  DUPS = dupMap();
   ensurePosSafe();
 
   VIEWSET = computeViewSet();
@@ -3493,7 +3684,8 @@ function drawCanvas(){
     const horiz = (t === 'ivr' && o.orient === 'h');
     const sz = nodeSize(t, o);
     const smsMark = (t === 'did' && o.sms && SMSVIEW !== 'off') ? SMSVIEW : '';
-    h += '<div class="cn cn-' + t + (t === 'ivr' ? (horiz ? ' ivr-h' : ' ivr-v') : '') +
+    const dupN = !!DUPS[o.id];
+    h += '<div class="cn cn-' + t + (dupN ? ' dupnum' : '') + (t === 'ivr' ? (horiz ? ' ivr-h' : ' ivr-v') : '') +
          (smsMark === 'stripe' ? ' sms-stripe' : '') +
          (CVSEL === o.id ? ' sel' : '') + (inView ? '' : ' dimmed') +
          '" data-t="' + t + '" data-id="' + o.id +
@@ -3502,6 +3694,14 @@ function drawCanvas(){
     h += '<i class="in' + (horiz ? ' top' : '') + '" data-in="' + o.id + '"></i>';
     h += '<div class="cnh"><span class="cnt">' + esc(nodeTitle(t, o)) + '</span>' +
          (smsMark === 'stripe' ? '<span class="smsHdr" title="SMS enabled">SMS</span>' : '') +
+         /* no S for an endpoint: "number only" means nothing when there is no
+            destination to number. Just i, and in the header so it costs no
+            height on the node type there are most of. */
+         (t === 'ext'
+           ? '<span class="seg adv hdr' + (destShows(o) === 'detail' ? ' on' : '') +
+             '" data-adv="' + o.id + '" title="Department, handset and licences for this extension. ' +
+             'Click again to follow the View menu.">i</span>'
+           : '') +
          (issue ? '<span class="cnw" title="' + esc(issue) + '">\u26a0</span>' : '') +
          (ENDPOINT[t] ? '' : '<button class="cnot' + (ot ? ' on' : '') + '" data-ot="' + o.id +
             '" title="Operation Times gate">\u23f1</button>') +
@@ -3526,6 +3726,7 @@ function drawCanvas(){
            '<span class="seg adv' + (md === 'detail' ? ' on' : '') + '" data-adv="' + o.id +
            '" title="Full detail for this DID. Click again to follow the View menu.">i</span></div>';
     }
+    if (t === 'ext') h += extBlock(o);
     if (t === 'ivr') h += ivrBlock(o);
     h += objBlock(t, o);
     if (t === 'dg' || t === 'q' || t === 'erg'){
@@ -3692,7 +3893,25 @@ const NB = { border: 3.2, header: 30, sub: 23.5, greet: 22.75, ctl: 29.75,
              /* control strip: measured button widths, the gap, and what a
                 wrapped second row costs */
              segW: { S:23.3, i:19.1, V:23.3, H:23.9, C:22.4 }, segGap: 3,
-             ctlPad: 18, ctlRow: 21 };
+             ctlPad: 18, ctlRow: 21,
+             /* measured chip widths at 9px bold, including padding, border and
+                the 2px margin \u2014 the estimate has to wrap exactly as the CSS
+                does or the layout guards work from the wrong height */
+             licW: { Mobile:45, Office:43, Business:57, Agent:43, Supervisor:64 },
+             licPad: 16 + 62 + 6 };
+
+/* how many lines the licence chips take inside a node of the given width */
+function licLines(o, nodeW){
+  const list = snetList(o && o.snet);
+  if (!list.length) return 1;
+  const avail = nodeW - NB.licPad;
+  let n = 1, cur = 0;
+  list.forEach(v => {
+    const w = NB.licW[v] || (v.length * 5 + 20);
+    if (cur + w > avail && cur > 0){ n++; cur = w; } else cur += w;
+  });
+  return n;
+}
 
 /* how tall the IVR control strip is at a given node width */
 function ctlHeight(width){
@@ -3719,6 +3938,7 @@ function sizeSig(t, o){
           t === 'did' ? destShows(o) + (o.val ? 'r' : 'u') + (otFor(o.nr) ? 'g' : '') +
                         (o.sms ? SMSVIEW : '') : '',
           t === 'ivr' || t === 'dg' || t === 'q' || t === 'erg' ? destShows(o) + DIDCOL : '',
+          t === 'ext' ? destShows(o) + (o.dept ? 'd' : '') + snetList(o.snet).join(',') : '',
           r ? r.keys.length + ':' + (r.hidden ? 1 : 0) : '',
           otFor(numFor(t, o)) ? 1 : 0,
           nodeSub(t, o) ? 1 : 0,
@@ -3736,6 +3956,8 @@ function nodeSize(t, o){
       est += NB.ctlAdv + b.lines * NB.cnd + (b.rows ? NB.advTop + b.rows * NB.advRow : 0);
       if (o.sms && SMSVIEW === 'row') est += NB.pr;
     }
+    if (t === 'ext' && md === 'detail')
+      est += NB.advTop + (2 + (o.dept ? 1 : 0) + (licLines(o, 230) - 1)) * NB.advRow;
     if (t === 'dg' || t === 'q' || t === 'erg'){
       est += NB.ctlAdv;
       if (md === 'detail'){
@@ -3744,7 +3966,8 @@ function nodeSize(t, o){
       }
     }
     /* a list of names needs room; numbers do not */
-    const wide = (md === 'name' || md === 'detail') && (t === 'dg' || t === 'q' || t === 'erg');
+    const wide = ((md === 'name' || md === 'detail') && (t === 'dg' || t === 'q' || t === 'erg'))
+              || (md === 'detail' && t === 'ext');
     return { w: wide ? 230 : 190, h: Math.ceil(measured || est) };
   }
   const r = ivrRows(o);
@@ -3881,6 +4104,36 @@ function freeSpot(x, y, skipId){
   let guard = 0;
   while (clash() && guard++ < 300){ y += 28; if (y > 1500){ y = 24; x += 230; } }
   return { x: Math.max(0, Math.round(x)), y: Math.max(0, Math.round(y)) };
+}
+
+/* Where a duplicate goes: right along the row, then wrap to the next row down.
+   freeSpot searches downward and then jumps a whole column, which is right for
+   dropping something new from the toolbox but puts a copy far from what it was
+   copied from. A copy belongs beside its original, where the eye already is. */
+function spotRightOf(t, o, skipId){
+  const s = nodeSize(t, o);
+  const stepX = s.w + 22, stepY = s.h + 22;
+  let lim = 0;
+  CV_TYPES.forEach(k => arr(k).forEach(x => {
+    if (typeof x.x !== 'number') return;
+    lim = Math.max(lim, x.x + nodeSize(k, x).w);
+  }));
+  lim += stepX;                        /* one node past the widest thing there is */
+  const clash = (x, y) => CV_TYPES.some(k => arr(k).some(b => {
+    if (b.id === skipId || typeof b.x !== 'number') return false;
+    const z = nodeSize(k, b);
+    return Math.abs(b.x - x) < (Math.max(z.w, s.w) + 20) &&
+           Math.abs(b.y - y) < (Math.max(z.h, s.h) + 14);
+  }));
+  const startX = o.x || 0, startY = o.y || 0;
+  let x = startX + stepX, y = startY, guard = 0, wrapped = false;
+  while (clash(x, y) && guard++ < 400){
+    x += stepX;
+    if (x > lim){ x = startX; y += stepY; wrapped = true; }
+  }
+  /* stay exactly level with the original while on its row: snapping y would
+     shift the copy a couple of pixels off and look like a mistake */
+  return { x: Math.max(0, snapTo(x)), y: Math.max(0, wrapped ? snapTo(y) : startY) };
 }
 
 function dropNew(type, x, y){
@@ -5178,7 +5431,7 @@ function initCanvas(){
     if (ovr){
       const wantDetail = ovr.hasAttribute('data-adv');
       const id = ovr.getAttribute(wantDetail ? 'data-adv' : 'data-simple');
-      const o = ['dids','ivr','dg','q','erg'].reduce((f, k) =>
+      const o = ['dids','ivr','dg','q','erg','ext'].reduce((f, k) =>
         f || (DOC[k] || []).find(x => x.id === id), null);
       if (o){
         const now = destShows(o);
@@ -5364,6 +5617,13 @@ function initCanvas(){
     dcs.value = DIDCOL;
   }
 
+  document.addEventListener('click', e => {
+    const j = e.target.closest('[data-jump]');
+    if (!j) return;
+    const [t, id] = j.getAttribute('data-jump').split(':');
+    jumpToNode(t, id);
+  });
+
   const rc = $('rvChip');
   if (rc) rc.addEventListener('click', () => setRouting('*', true));
 
@@ -5374,6 +5634,7 @@ function initCanvas(){
   if (pn) pn.addEventListener('input', () => {
     DOC.meta.name = pn.value.trim() || 'Untitled flow';
     const d = $('docname'); if (d) d.textContent = DOC.meta.name;
+    markNamed();
   });
 
   const fb = $('fileBtn'), fm = $('fileMenu');
@@ -5760,6 +6021,13 @@ function setView(v){
 function syncName(){
   const pn = $('projName');
   if (pn) pn.value = (DOC.meta.name === 'Untitled flow') ? '' : (DOC.meta.name || '');
+  markNamed();
+}
+/* an unnamed project is not an error, but it is worth seeing: it decides what
+   every download is called */
+function markNamed(){
+  const w = $('pnWrap'), pn = $('projName');
+  if (w && pn) w.classList.toggle('unnamed', !pn.value.trim());
 }
 
 function restorePanel(){
@@ -5840,6 +6108,106 @@ document.addEventListener('DOMContentLoaded', () => {
 
 Versions below cover the work recorded in this build; entries before 0.22 were
 not kept in-app and are not reconstructed here.
+
+## [0.60.0]
+### Fixed
+- **A duplicate landed on top of the original.** The copy took the original's
+  coordinates verbatim, so both sat on the same pixel \u2014 the new one invisible
+  beneath the old, and an overlap reported that nobody caused. It now goes to the
+  first free space to the right, wrapping to the next row down, which keeps a
+  copy beside the thing it was copied from, level with it while there is room on
+  that row.
+- **Duplicate never redrew the canvas.** It refreshed the panel and stopped, so
+  the copy was not on screen until something else triggered a draw. The copy is
+  now selected, scrolled to and flashed, the same treatment the duplicate-number
+  links use.
+- A duplicated DID has no number, since one cannot be guessed. The flash now says
+  so \u2014 *"Give it a number"* \u2014 rather than leaving a finding to explain it.
+
+## [0.59.3]
+### Fixed
+- **Licences past the second were silently cut off.** The row could not wrap and
+  the value column was 106px; five chips are 256px, so 150px of it simply
+  vanished. Worse than an ellipsis, because a clipped chip still looks like a
+  whole chip \u2014 which is why it went unnoticed.
+- The row now wraps, and an extension widens to 230px at Full detail.
+  **Widening alone changed nothing**: at both 190px and 230px the line counts
+  were 1, 1, 2, 2, 3. Taking 1px off the chip margin is what moved them to
+  1, 1, 1, 2, 2 \u2014 so three licences now sit on one line and five on two.
+- The height estimate wraps the chips exactly as the CSS does, so the layout
+  guards work from the real height rather than assuming one line.
+
+## [0.59.2]
+### Fixed
+- **Mobile was invisible and the deeper licences appeared to shout over it.**
+  The ramp tinted each chip's fill, and the palest step came out `#eef4fb`,
+  byte-identical to `--blue-l`, which is the extension node's own background \u2014
+  so the first chip had a contrast of 1.00 against the surface it sat on and the
+  second only 1.10. I had measured the ramp against white and against the dark
+  canvas, but never against the node it actually renders on.
+- The ranking now lives in the **border**. A line only has to be seen, not to
+  carry text, so it can range much wider than a fill while one ink stays legible
+  on every chip. Every border clears 1.53 to 7.30 against the node in light and
+  1.97 to 6.59 in dark, adjacent steps are 52 to 62 apart in RGB, and the ink
+  reads 10.91 on every chip instead of sliding from 9.86 down to 5.58.
+
+## [0.59.1]
+### Fixed
+- The extension detail was unreachable. I recommended it "at Full detail behind
+  the i button", then built only the Full detail half \u2014 so a single node had no
+  way to show it and switching the whole canvas was the only route. Extensions
+  now carry an **i** button, in the header rather than a control strip: a strip
+  costs 30px and extensions are the type there are most of. No **S**, because
+  "number only" means nothing for an endpoint.
+- The sample's extensions had no department, handset or licence, so turning the
+  feature on showed four nodes reading *not set*. They now carry realistic
+  values, including a softphone and a handset with no licence.
+
+## [0.59.0]
+### Added
+- **Extensions show their phone and licences at Full detail**: department when
+  set, the handset, and a chip per S-NET Connect licence.
+- Licence chips use five tints of the extension's own blue, in licence order, so
+  the colour carries the same meaning as the position. Five separate hues was
+  the obvious idea and the measurements ruled it out \u2014 every candidate sat
+  within 31 to 62 of a colour already meaning DID, ERG or queue. A single-hue
+  ramp with one text colour failed too: the middle step read 3.15 on white and
+  2.74 on dark ink. Light tints clear AA at every step, 9.86 down to 5.58.
+- Dark mode gets its own ramp rather than reusing the light one, which measured
+  11 to 12 against the dark surface and would have glowed. Every dark step also
+  clears AA, 8.65 down to 4.65.
+- The handset is a two-state chip \u2014 desk phone or software client \u2014 matched on
+  the words people type rather than a list of vendors. Anything unrecognised is
+  treated as a handset.
+### Note
+- Colour is never the only signal: every chip keeps its full name, because a
+  9px blue ramp is exactly what a colour-blind reader cannot separate.
+
+## [0.58.0]
+### Added
+- **Duplicate local destination number** is now visible on the canvas, not only
+  in the findings. Both objects get a red edge stripe and their number in red,
+  plus the warning icon naming what they clash with. A stripe rather than an
+  outline, because the selection ring is also 2px and the two together read as
+  one thick smear.
+- The finding is renamed to **Duplicate local destination number** and each
+  object is a link that selects it, scrolls it into view and flashes it \u2014
+  un-hiding its type and switching to the All tab first if need be.
+### Fixed
+- The check missed **conferences and agents** entirely, and only compared across
+  types \u2014 so two queues both on 4001 went unreported. It now covers all eight
+  local destination types and same-type clashes.
+
+## [0.57.1]
+### Changed
+- The project name is now the loudest thing in the banner: wider, 14px bold on a
+  lighter field with an amber edge, and the tool's own title stepped back to
+  make room for it. The name decides what every file is called, and the fixed
+  product name does not change.
+- While it is unnamed the field is outlined in dashed amber and reads *Name this
+  flow*, so it is obvious before a download turns up called `call_flow`.
+- Placeholder text is white at 72%. The lower alphas looked right but measured
+  3.25 against the field, below AA.
 
 ## [0.57.0]
 ### Added
