@@ -3,6 +3,828 @@
 Versions below cover the work recorded in this build; entries before 0.22 were
 not kept in-app and are not reconstructed here.
 
+## [0.110.0] - 2026-09-01
+### Changed
+- **The Expand button pops all the time now.** The ⤢ button wears the loud
+  amber in its normal state too, not just while the view is expanded — the
+  same treatment either way, with the short pulse still marking the moment
+  the full-window view engages.
+
+## [0.109.0] - 2026-09-01
+### Changed
+- **The Exit button pops while the view is expanded.** In the full-window
+  work area the ⤢ button now turns solid amber with a short pulse as it
+  engages, so the way back out is findable at a glance (the pulse respects
+  the system's reduced-motion setting). It returns to its quiet style on
+  exit.
+
+## [0.108.0] - 2026-09-01
+### Changed
+- **Expand also folds the side panel.** Filling the window with the work area
+  now collapses the Upload/Inspector/Notes/AI panel to its rail so the canvas
+  really gets the whole window — and Exit puts the panel back the way it was.
+  A panel you had collapsed beforehand stays collapsed, and the rail's Panel
+  button still opens it inside the expanded view.
+
+## [0.107.0] - 2026-09-01
+### Changed
+- **The theme switch is an icon at the far right.** The Dark/Light button
+  moves past the title and version to the banner's outer edge and shows just
+  the moon/sun glyph — the tooltip and a screen-reader label still say what it
+  does. In the left group, Canvas/Forms now sits to the right of New (File,
+  View, New, Canvas/Forms).
+
+## [0.106.0] - 2026-09-01
+### Fixed
+- **Only one banner menu opens at a time.** Clicking File while the View menu
+  was open (or the reverse) left both panels showing on top of each other;
+  opening either now closes the other first.
+
+## [0.105.0] - 2026-09-01
+### Fixed
+- **The File and View menus no longer open off-screen.** With the buttons on
+  the left (0.104.0), both dropdowns still hung from their button's right
+  edge and ran past the window's left border. A menu now anchors to whichever
+  side keeps it on screen: left edge while its group sits on the left, right
+  edge when the side toggle moves the group right.
+
+## [0.104.0] - 2026-09-01
+### Changed
+- **The banner buttons are regrouped.** Left of the name: **File**, then
+  **View**, then Canvas/Forms, then New. Right of the name, beside the title
+  and version: **Sample flow** — now on an amber-outlined field so it stands
+  out — and the **Dark/Light** switch, with the version chip outermost. The
+  side toggle and the pinned logo behave as before.
+
+## [0.103.0] - 2026-09-01
+### Changed
+- **The empty name field now reads "Project Name"** instead of "Name this
+  flow" — plainer about what the centred banner field is.
+
+## [0.102.0] - 2026-09-01
+### Changed
+- **The logo is pinned to the far left.** The coeo mark no longer moves with
+  the side toggle: it holds the banner's left corner in both layouts, while
+  **Buttons on the right** now swaps just the buttons and the title/version
+  block — those two still never share a side.
+
+## [0.101.0] - 2026-09-01
+### Changed
+- **The buttons sit on the left now, and the ends of the top bar can swap.**
+  Canvas/Forms, Dark, New, Sample flow, View and File move to the left of the
+  banner by default, with the logo and version on the right and the project
+  name still centred between them. A new View option — **Buttons on the
+  right** — swaps the two ends in one click; the logo/version block always
+  takes the opposite side, and the choice is saved with the project.
+
+## [0.100.0] - 2026-09-01
+### Changed
+- **The project name is centred in the banner.** The headline name now sits in
+  the middle of the top bar — the logo and tool title on the left, the controls
+  on the right — with the text centred in its field. Same click-to-rename
+  field, amber edge and tab-title behaviour as 0.99.0.
+
+## [0.99.0] - 2026-09-01
+### Changed
+- **The project name is the headline now.** The name moves to the front of the
+  banner, right after the logo, set large with its amber edge — the tool's own
+  title steps back to a small label over the version chip. The browser tab
+  carries the name too, so a flow can be found among open tabs. Same
+  click-to-rename field, same dashed hint while unnamed.
+
+## [0.98.0] - 2026-09-01
+### Added
+- **An Operation Hours filter.** The View menu gains **Only Operation Hours**:
+  the canvas keeps just the DIDs and local destinations that carry a ⏱ gate —
+  the after-hours picture on its own, across every type. It changes the view
+  only (export, findings and the traced map still see the whole flow), it is
+  saved with the project, and turning it on with no gates in the flow explains
+  itself instead of blanking the canvas.
+
+## [0.97.0] - 2026-09-01
+### Added
+- **Operation Times are editable on the canvas — the oldest open item.** The ⏱
+  badge now opens an editor instead of blind-toggling the gate: **Open Days
+  rows** exactly like the PBX's own screen — day chips plus time-from/-to, with
+  as many windows as the line needs (say 08:00–23:59 weekdays plus a 00:00–02:00
+  night window) — and the **after-hours destination** picked from the flow's own
+  destinations, with the voicemail flag. Removing a gate moved into the editor,
+  behind a confirmation. Existing gates migrate their old one-line schedule into
+  the first row automatically, and the ⏱ tooltip now shows the hours at a
+  glance.
+- **The workbook carries every window.** The Operation Hours sheet writes one
+  row per open window (number, type and after-hours destination repeated) — the
+  multi-row form the template's Read me always sanctioned; single-window gates
+  export byte-identically to before.
+### Fixed
+- **A gate created by wiring the closed port can now be a voicemail gate** — it
+  used to be written with a dead `vm` key instead of `isVm`, so the voicemail
+  flag silently never applied to wire-created gates.
+
+## [0.96.0] - 2026-08-31
+### Changed
+- **DID numbers take E.164 and 10-digit dialing everywhere, stored one way.**
+  The CSV import always stripped punctuation, but the inspector form stored
+  whatever was typed — a `+13125550100` entered by hand could never match, route
+  or push, silently. Both paths now normalise to the same digit-only form, so
+  `+1 (312) 555-0100`, `13125550100` and `3125550100` are one number; the same
+  number in two spellings dedupes on import instead of duplicating; the template
+  ships an E.164 example row; and import now caps a DID at 15 digits (the push
+  limit) with a clear reason instead of accepting numbers that could never be
+  pushed.
+### Added
+- **A finding when local numbers are mixed lengths.** Every local destination —
+  extensions, voicemail, conferences, IVRs, dial groups, queues, ERGs — must
+  share one number length (a PBXware tenant has a single fixed ext_length);
+  **agents are exempt**. Mixed lengths now raise a finding that groups the flow
+  by length and names the odd ones out with jump links. The sample flow was
+  brought into line (the practice-briefing conference is now 6400).
+
+## [0.95.0] - 2026-08-31
+### Fixed
+- **The Align (Row / Column) buttons show when they are usable.** They looked
+  identical whether or not anything was selected, so with an empty or
+  single-node selection a click only produced a hint that was easy to miss —
+  reading as "alignment does not work". The buttons now grey out until two or
+  more nodes are selected and light the moment a box-drag or Shift-click makes a
+  real selection. The behaviour itself was verified working end to end through
+  real event paths: three Shift-clicks then Row put all three on one row (grid
+  positions 22/242/462), Column mirrored, the marquee selected all twenty sample
+  nodes, and zero errors were raised.
+
+## [0.94.0] - 2026-08-31
+### Changed
+- **The layout buttons are named what they are: Orientation.** ⇄ Horizontal and
+  ⇅ Vertical re-lay the whole flow by call stage — they never aligned anything —
+  so the group label now says Orientation.
+### Added
+- **A real Align, for the selection.** Select two or more nodes (box-drag or
+  Shift-click), then **Row** makes their vertical positions the same — one row —
+  and **Column** makes their horizontal positions the same — one column. The
+  anchor is the topmost / leftmost node, snapped to the grid; nodes that would
+  collide on the new line are packed apart in grid steps with their order kept,
+  so an overlap is impossible and everything stays on the same lattice as
+  dragging. Routing is never touched. With fewer than two nodes selected the
+  buttons explain how to select instead of doing nothing.
+
+## [0.93.0] - 2026-08-31
+### Fixed
+- **Align now snaps to the grid.** Aligned nodes used to land on arbitrary
+  pixel positions even with the View menu's snap guard on, so an aligned node
+  and a hand-dragged one lived on different lattices and never quite lined up.
+  Align's final placement now goes through the same snap as dragging (guard
+  honoured — with snap off it stays plain rounding), and a snapped neighbour
+  that rounds too close is bumped along in grid steps, so spacing keeps a
+  readable floor and an overlap stays impossible whatever the rounding. Proven
+  on the sample flow and a 56-node dense flow in both directions: every node on
+  the 22px grid, zero overlaps, the four call-stage columns intact — and the
+  sample flow is verified working under all the recent changes, in the real DOM.
+
+## [0.92.0] - 2026-08-31
+### Changed
+- **After the test upload, continue in batches or go full auto.** The review
+  gate now offers three ways forward. **Upload next batch** sends just the next
+  tier — ① extensions, then ② ring groups/ERGs, then ③ IVRs, then ④ DIDs — and
+  pauses again after each with "*batch* updated — N created and verified", so a
+  big flow lands one confirmed section at a time until everything is complete.
+  **Upload all remaining — auto** sends everything still waiting in one go;
+  refusals are collected rather than fatal, and the run ends with a report that
+  names **what was NOT uploaded** — every refused object with the PBX's own
+  reason (duplicates called out as such), anything created but not visible on
+  re-read, plus the standing never-attempted items (duplicates already on the
+  PBX, types the API cannot create). **Stop here** still keeps what has been
+  verified and sends nothing more. Every batch is verified against a fresh read
+  of the PBX before the next is offered.
+- The test runner now awaits asynchronous tests — a rejected async expectation
+  fails the run instead of passing silently — and the harness can lift `async`
+  functions, so the live-run machinery itself (`pbxRunOps`, batch collection) is
+  under test for the first time.
+
+## [0.91.0] - 2026-08-31
+### Changed
+- **The upload order is now tiered, and DIDs go truly last.** A push (and its
+  test upload) follows the sequence a call depends on: **① extensions** first
+  (agents and conference bridges belong to this tier, but the PBXware API has no
+  add action for them, so they are skipped, not reordered) → **② ring groups and
+  ERGs** (queues likewise API-less) → **③ IVRs** → **④ DIDs last**. DIDs used to
+  sit third — harmless while IVRs could not be pushed, but wrong the day they
+  can. The order is now shown in the dialog above the plan, the emitted script's
+  header says the same, and the suite asserts each tier precedes the next with
+  DIDs pinned to the final slot.
+
+## [0.90.0] - 2026-08-31
+### Changed
+- **A live push is now canary-first, with a review gate before the rest.** The
+  run starts by creating exactly **one of each selected type — a test extension,
+  a test group, a test DID — in dependency order**, then re-reads the PBX and
+  verifies each actually landed. Anything not visible on re-read (or a list that
+  cannot be re-read) stops the run with nothing else sent. When the test upload
+  verifies, the dialog **pauses on a review section** — what was created and
+  verified, and what is still waiting, per type with numbers — and asks:
+  **Create the rest** or **Stop here** (keeping only the test objects). Only the
+  operator's click sends the remainder. A selection of one-per-type skips the
+  review; there is nothing left to ask about.
+- **Duplicates alarm by name and are never pushed.** Objects already on the PBX
+  now appear in a loud **“Needs attention — already on the PBX”** block naming
+  every number per type (and the preflight warn names them too) instead of a
+  bare count. Behaviour is unchanged — they were never pushed — but now they
+  demand a look. A collision the PBX only reveals at create time (“number
+  reserved by…”) is likewise classified **Duplicate on the PBX — needs
+  attention**, with what to do about it, rather than a raw error string.
+- **The digit-length check always answers.** It already validated every local
+  type's numbers (extensions, dial groups, IVRs, ERGs — DIDs exempt as full
+  numbers) against the tenant's real `ext_length`; but when the tenant was never
+  resolved it said nothing. It now reports a visible warning — “digit length
+  could not be verified — run Test connection” — so pass, fail, or
+  cannot-verify, there is always a verdict.
+
+## [0.89.0] - 2026-08-31
+### Changed
+- **The Standalone and MLT buttons light up while their PBX is the target.** In
+  both the Fetch and Push dialogs, the button whose host the Server fields point
+  at now shows a lit state (navy fill with a ring), and it follows the fields
+  live — click MLT and it lights, retype the host by hand and both dim. Matched
+  on the host alone, so editing the tenant does not un-light it. Which box you
+  are about to talk to is now readable at a glance.
+
+## [0.88.0] - 2026-08-31
+### Changed
+- **The canvas has a real dark palette.** The per-type node colours (tinted
+  destination rows, key rows, swatches, wire tints, the View menu's type chips)
+  were light-theme pastels injected inline, so dark mode drew pale `#e4f5f7`-style
+  rows glaring inside dark nodes. A dark counterpart table now mirrors the dark
+  theme's own family tokens — dark fills a step off the node colour, luminous
+  inks, wire accents that stay visible on the dark canvas — and the canvas reads
+  whichever table matches the live theme, including a dark PNG export. Every
+  dark ink-on-fill pair measures ≥8:1 and every wire accent ≥3:1 on the canvas
+  (`tests/contrast.test.js` now computes both tables); light mode is untouched,
+  byte for byte the same colours as before.
+
+## [0.87.0] - 2026-08-31
+### Added
+- **Conference CSV import, completed.** The importer spec for conferences existed
+  but was never wired in: no upload section, no sample link, and a template whose
+  `number,name` header nothing could recognise — so `conference_template.csv`
+  could not import anywhere. The Upload panel now has a Conferences section with
+  a drop zone and template link, the sample carries a distinctive
+  `conference_number` header the type-sniffer detects, and the shipped template
+  was regenerated from the app.
+### Fixed
+- **A failed direct-route Test connection explains itself again.** `pbxProbe` —
+  the diagnostic that tells "blocked by CORS" from "unreachable" from mixed
+  content, each with its fix — was left uncalled by the push rework, so a
+  direct-route failure said only "Not connected". Both Test connections now run
+  it when the direct route fails and append its finding.
+- **Dead code removed:** `pbxCurlTest` (the copy-a-CORS-check button's helper,
+  feature removed in 0.80.0) and `pbxRedact` (nothing displays a URL carrying a
+  key any more). With `pbxProbe` wired, both fetch sites CLAUDE.md invariant 1
+  documents are live again, and the suite's five recorded defects are all closed.
+### Added
+- **Contrast is now computed, not promised.** `tests/contrast.test.js` derives
+  every normal-text pairing from the CSS tokens in both themes and asserts WCAG
+  AA; the true weakest pair is 4.76:1. The headless click-through also proves the
+  project library round-trip (save → read back) when an IndexedDB shim is present.
+
+## [0.86.0] - 2026-08-31
+### Fixed
+- **The emitted push script now declares the server id it actually sends, and
+  refuses to hide an unresolved tenant.** `pbxServerId()` is the single source of
+  the `server=` value — the resolved internal id on a multi-tenant PBX, never the
+  tenant code — used by both the live push and the emitted `.sh`. The script's
+  `SERVER=` line and header used to show the typed code (or blank) while every
+  request sent something else; they now agree, and when a multi-tenant code was
+  never resolved the emitter writes a loud warning and drops the bad `server=`
+  rather than sending the code, which PBXware only answers with "invalid server id".
+- **A multi-tenant PBX whose host name contains "pbx" is no longer mislabelled
+  "Standalone".** The banner and status now decide standalone vs multi-tenant from
+  the tenant field, not the host name, so a typed tenant code is always shown as a
+  tenant.
+- **ERG and Queue CSVs are no longer misread as IVR.** `sniffKind` treated a
+  `timeout` column as an IVR tell, but queues and ERGs carry one too, so dropping a
+  queue or ERG file onto the canvas detected it as an IVR. IVR is now told by its
+  key columns, and the more specific queue/ERG tells are checked first.
+### Added
+- **A verification harness so a run is provably checked.** `node tests/run.js` now
+  also covers the templates (the twelve-sheet workbook and its load-bearing IVR /
+  Queues columns, a drift check against the shipped `.xlsx`, and every `.csv`
+  against the importer), the project library (a saved record can never hold a key),
+  and the `server=` API shape. `tests/live_verify.sh` checks the real API read-only
+  on both a standalone and a multi-tenant PBX — tenant resolve, `ext_length`, and
+  every readable type — with an opt-in single-create write smoke. `docs/VERIFY.md`
+  is the one-page guide.
+
+## [0.85.0] - 2026-08-31
+### Added
+- **A project library — saved projects, offline, in the browser.** File ▸ Project
+  library keeps named projects in the browser (IndexedDB), so you no longer have to
+  download, name and reopen loose `.json` files by hand. Save the current flow under
+  a name; reopen, rename, duplicate or delete any saved project; and a **Last
+  session** entry autosaves the current flow as you work, so a reload or crash
+  loses nothing. It is offline and browser-local — no server, never shared between
+  machines — so **File ▸ Save `.json` stays the portable, permanent copy** and the
+  way to move a project to another computer. A saved record is exactly what
+  `docForSave()` writes, so it can never hold an API key. Where a browser blocks
+  local storage (a Confluence frame, a private window) the library says so and
+  Save/Open `.json` works exactly as before.
+
+## [0.84.0] - 2026-08-20
+### Added
+- **A QA layer over Fetch and Push, so a run is provably checked.** Fetch now
+  shows a **Fetch QA** block after reading: per type it names the rows the parser
+  dropped, duplicate numbers in the reply, records with no name, and any route
+  that points at a number nowhere in the fetch or the flow — the silent data loss
+  is silent no longer, and the read-nothing types (voicemail, conference, queue,
+  agent) are listed with their reason. Push now leads its plan with a
+  **preflight verdict**: a ✓/!/✗ line for every check — connected, tenant
+  resolved, capability per type, **digit length against the tenant's real
+  `ext_length`**, existing objects (reviewed, never edited), and **route
+  correctness** (every destination must already be on the PBX or be created in the
+  same run, extensions → ring groups → DIDs last) — each failure carrying its fix.
+  A hard ✗ disables the Create button on top of the existing per-type guardrail.
+  All the checks are pure functions with headless tests on both a standalone and a
+  multi-tenant fixture, and a new `diagrams/pbxware_pbx_sync_flowchart.mermaid`
+  shows the Fetch (read) and Push (write) paths side by side.
+
+## [0.83.0] - 2026-08-20
+### Changed
+- **A type the push cannot create now says whose problem that is.** "The API
+  refused this — no add action, or the key is not permitted" covered two
+  different situations with two different owners, and sent people to the wrong
+  one. The capability list now keeps the PBX's own words: when the refusal is
+  `Selected action not allowed` it says the action exists and this key's
+  whitelist does not include it, and names where an admin grants it (Settings ▸
+  Admin Settings ▸ API). Any other refusal is quoted verbatim instead of
+  paraphrased. Which limit gets named matters as much as the wording: an IVR or
+  an ERG cannot be built into a flat request whatever the key says, so those rows
+  lead with that and state outright that granting the action would not help —
+  rather than sending someone to an admin to widen a key that was never the
+  problem.
+- **The extension payload is re-confirmed against the live test PBX, and the way
+  it was confirmed is now written down.** All seven required defaults were
+  checked without creating anything: sent against an extension number that
+  already exists, so a payload that validates fails on "number 100 is reserved"
+  rather than making an extension, while dropping any one field answers
+  `Required field '<name>' is missing`. None of the seven is optional.
+- **Recorded the trap in `pbxware.ext.configuration`.** It returns the *stored*
+  shape, where `ua`, `secret`, both call limits and `voicemail` sit nested under
+  `options` — but `ext.add` takes the whole set flat and maps them itself.
+  Rewriting the flat defaults to match a `configuration` reply looks like a
+  correction and breaks every create, so the code now says so where someone
+  would try it.
+- Probing the standalone test PBX also established what its key may actually do:
+  the five list actions plus `ext.add` and `ext.configuration`. `did.add`,
+  `ring_group.add`, `tenant.list`, `queue.list` and every `.edit` come back
+  `Selected action not allowed`, so DIDs and ring groups are wired but not
+  pushable with that key until an admin widens it. The dialog has always probed
+  this per connection; what changed is that it now explains the answer.
+
+## [0.82.0] - 2026-08-20
+### Added
+- **The push works out what actually needs pushing, and pushes what you tick.**
+  Test connection now builds a plan for the whole flow instead of counting
+  extensions: it asks the API which types this key may create, reads back what
+  the tenant already has for each of them, and reports every object in one list —
+  with a checkbox each for the ones it can create, and everything that would not
+  be created accounted for beside them. Extensions, DIDs and ring groups are
+  wired; which of them a given key may actually use is probed, never assumed. Tick and untick
+  across types, then Push sends exactly the ticks, extensions first, then the
+  groups that ring them, then the numbers that point at either — a DID cannot be
+  aimed at a destination the same run has not created yet.
+- **Nothing is created blind.** A type whose list action the key cannot read is
+  reported as unchecked and is not offered, because with nothing to compare
+  against every object in the flow looks new and a push would duplicate what is
+  already on the PBX. The same refusal covers a number shared with another object
+  and a DID that appears twice.
+- **Types that can never be pushed now say so.** Queues, agents, conferences,
+  voicemail and operation-times gates are named in the dialog with the reason —
+  no add action in the API, or no editable surface here yet — rather than being
+  quietly missing. IVRs and ERGs sit in between: the API would take them, but
+  their keymap and member list are nested and no flat request for them has been
+  confirmed, so they are counted and named and no request is invented.
+- **The two emitters have buttons again.** Request URLs `.txt` and Script `.sh`
+  write out the ticked requests, aimed straight at the PBX and never through the
+  proxy, with no network involved. On the `file://` route, where the reply to a
+  request that did take effect may be unreadable, that is still the honest path —
+  and for a type whose parameters are unconfirmed it is how you run one by hand
+  before pushing many.
+- **Checked against real replies from the test PBX, not just the docs.** The
+  destination a DID is given now uses PBXware's own wording, which is
+  inconsistent on purpose to nobody: a live `did.list` reply carries "Extension"
+  singular beside "Queues" and "Conferences" plural, and sending the tidy form
+  lands the DID on no destination at all. A ring group now also carries
+  `last_dest_vm`, present in every real row and absent from this builder's
+  fields, derived from whether its final destination is one of the flow's own
+  mailboxes — wrong either way sends the overflow somewhere that never answers.
+- **A DID whose trunk is a name rather than an id is flagged before the run.**
+  Every trunk in a real reply is a numeric id; the builder's trunk field is free
+  text people fill in with a name. That is a warning on the plan and not a
+  refusal — it may well be accepted — but the run stops on the first request the
+  PBX rejects, and hearing about it beforehand is worth more than afterwards.
+### Changed
+- **Extensions are the only type whose request set is confirmed against a live
+  PBX.** DIDs and ring groups are marked *unconfirmed* on their row and in the
+  confirmation prompt: the parameter names come from what the matching list
+  action returns, not from a create that worked. A wrong guess stops the run on
+  the first request rather than half way through.
+- The credentials `.csv` covers extensions only, since nothing else has a
+  generated secret, and the progress line, the confirmation and the emitted
+  script now all name the tally the same way — "2 extensions, 1 DID" — so the
+  three cannot disagree about what a run is about to do.
+
+## [0.81.0] - 2026-08-19
+### Added
+- **Voice AI agents, associated to a client.** The AI panel tab is now live. Each
+  voice AI agent belongs to a client — the same client a DID names in its tenant
+  field — and the tab lists only the selected client's agents, so you see just the
+  ones that client has access to. Pick a client, add or remove its agents, and it
+  all travels in the project `.json` (which never carries a key). The client list
+  is drawn from the DIDs plus any client already on an agent; the sample flow now
+  ships two agents for Bridgeway. The app already defaults to light mode.
+
+## [0.80.0] - 2026-08-19
+### Changed
+- **Push to PBXware, reworked to match Fetch, with real guardrails.** The dialog
+  now has the same target controls as Fetch — **Standalone** and **MLT** buttons,
+  the tenant-name banner, and one **Test connection** that confirms the tenant and
+  reads the existing extensions in a single step (on a multi-tenant PBX the tenant
+  code is resolved to the internal `server=` id, exactly as Fetch does).
+- **New "What can be pushed" test.** Test connection probes each type's add action
+  and reports what this key and tenant will actually accept — Extensions, DIDs,
+  ring groups, ERGs and IVRs each marked can-create or refused. On the test PBXes
+  only extension creation is allowed; the rest have no add action for these keys.
+- **Guardrails against an accidental push.** Nothing writes unless the connection
+  tested clean, the capability check says extensions are creatable, and there is
+  something new to create — and then an explicit confirmation names the count and
+  the exact tenant before anything is sent. The server-side proxy is also
+  read-only by default, so a push is refused until writes are deliberately turned
+  on, and the dialog says so plainly.
+- **Simplified.** Removed the CORS-test button, the phone-type (ua) mapping, the
+  paste/assume-empty inputs and the emit-URLs/shell-script section — a create
+  needs none of them. Push now creates extensions only (the one write the API
+  allows) and never edits or deletes. Each new extension is created with a
+  generated, policy-compliant SIP secret and PIN, offered as a one-time
+  credentials download after the push so a handset can register.
+
+## [0.79.0] - 2026-08-19
+### Fixed
+- **A standalone PBX is named as one, not "tenant 1".** A host with *pbx* in its
+  name is a single standalone phone PBX, not a multi-tenant system, so the
+  connection banner now reads **Standalone PBX** with the host beneath it and a
+  handset glyph — where it used to mislabel it *tenant 1 · tenant 1*. A real
+  multi-tenant sub-tenant still shows its name, code and server id with a building
+  glyph. The connection status line matches the same wording.
+
+## [0.78.0] - 2026-08-19
+### Changed
+- **The sub-tenant name now shows in a tinted banner, not a small line.** When a
+  tenant is resolved — or the moment MLT is picked — its name is drawn in an
+  accent-tinted banner under the Connection heading (a building glyph, the name
+  in bold, and *tenant 202 · server 169* beneath), so which tenant a fetch will
+  read from is unmissable. The small connection line beside Test connection now
+  carries only the route/host. The banner hides on a single-tenant PBX and when
+  Standalone is picked.
+
+## [0.77.0] - 2026-08-19
+### Changed
+- **The MLT button names the sub-tenant the moment it is picked.** Clicking MLT
+  now shows *tenant 202 — Rons Tenant* in the connection line straight away,
+  rather than only once the test has resolved it. A successful test then re-states
+  it with the internal `server=` id it mapped to.
+
+## [0.76.0] - 2026-08-19
+### Added
+- **One-click test server buttons in the Fetch dialog: Standalone and MLT.** The
+  old single **Defaults** button is now two. **Standalone** fills the single-tenant
+  test box (tst-pbx-01) and **MLT** fills the multi-tenant one (tst-mlt-01,
+  tenant 202 — Rons Tenant); both test the connection straight away. MLT also
+  clears the API-key field, so when the page is served by the proxy the right key
+  is supplied server-side by host — nothing to paste to try a multi-tenant fetch.
+
+## [0.75.0] - 2026-08-19
+### Added
+- **Fetch works against a multi-tenant PBX, by tenant code.** On a multi-tenant
+  PBXware the API's `server=` wants the tenant's internal id, not the tenant code
+  an operator knows it by — `server=202` is rejected where `server=169` works.
+  Test connection now reads `pbxware.tenant.list` first, maps the code you type
+  to the internal id, and shows the sub-tenant's name before anything is read
+  (e.g. *tenant 202 — Rons Tenant*); every subsequent fetch sends the resolved
+  id. If the key is not allowed `tenant.list`, or the code is not found, it falls
+  back to sending exactly what you typed, so a single-tenant PBX is unchanged.
+  Confirmed on the test multi-tenant box: extensions, DIDs, ring groups, ERGs and
+  IVRs fetch; conferences, voicemail, queues and agents have no read action there
+  either, the same as on a standalone PBX.
+
+## [0.74.0] - 2026-08-19
+### Fixed
+- **IVR key rows show their port dot again when destination names are on.** With
+  names shown, each menu key renders as the wider `krow2` row, but the dot's
+  size, border and fill were only styled for the plain key row — so the dot was
+  there and draggable but invisible, and a wire appeared to leave from nothing.
+  The dot now draws on every key row, including the timeout, and keeps its green
+  fill when the key is routed. The port itself never changed; only its styling
+  was missing.
+
+## [0.73.0] - 2026-08-19
+### Added
+- **Select several nodes and move them together.** Drag a box on empty canvas to
+  rubber-band everything it touches, or Shift/Ctrl/Cmd-click node headers to add
+  and remove them from the selection. Dragging any selected node then moves the
+  whole group, keeping their relative spacing and snapping to the grid. A plain
+  click or Esc clears the selection; clicking a single selected node drops back
+  to just that one. The box only ever picks up nodes that are actually on the
+  canvas, so a hidden or filtered destination is never scooped into a move you
+  cannot see.
+
+## [0.72.0] - 2026-08-19
+### Fixed
+- **The footer credits line up.** The "Created by" and "Contributor" labels were
+  baseline-aligned and sat slightly off the LinkedIn mark and the name beside
+  them; each credit is now a centred row, so the label, the logo and the name
+  share one line.
+
+## [0.71.0] - 2026-08-19
+### Changed
+- **Align now columns by call stage, not traced depth.** The layout bands a node
+  by its type — DID, then IVR, then ring group / dial group / queue, then the
+  endpoints (extension, agent, conference, voicemail) — so the columns always
+  read in the order a call travels, however the flow was wired. Before, a DID
+  that dialled an ERG or an extension directly dropped that destination into a
+  shallow column beside the IVRs; now it sits in its own stage's column. An
+  unrouted destination lands in its type's column beside its kind, rather than
+  being parked off on its own. The sample flow loads straight into this shape.
+
+## [0.70.0] - 2026-08-19
+### Added
+- **The canvas image export has a Tidy option.** Alongside Context, Theme,
+  Background and Size, the PNG dialog now offers **As placed** (the default —
+  export the nodes exactly where you put them), **Tidy ⇄** and **Tidy ⇅**. Tidy
+  lays the flow out by call depth for that one image and then puts the canvas
+  back exactly as it was, so you get a clean pipeline picture without disturbing
+  a layout you have arranged by hand. It applies to every scope in the export,
+  including a whole-flow .zip and copy-to-clipboard.
+
+## [0.69.0] - 2026-08-19
+### Changed
+- **Align now lays the flow out as a clean pipeline instead of stacked columns.**
+  The layout keeps its call-depth bands — DID, then IVR, then ring group / dial
+  group / queue, then the extensions, agents, conferences and mailboxes they
+  reach — but within each band it now orders nodes by where their wires go
+  (barycentre crossing reduction) and then slides each node toward the centre of
+  what it connects to. A straight chain draws as one straight line, and on a busy
+  flow the crossing wires drop by roughly two thirds. Nothing about routing
+  changes — only positions — and Horizontal and Vertical both use it.
+
+## [0.68.0] - 2026-08-18
+### Changed
+- **Each type group in the Fetch checklist has a header checkbox.** Click it to
+  select or clear that whole type — Extensions, DIDs, and so on — in one move,
+  with an indeterminate (–) state when only some of its rows are ticked. It
+  stays in step with the individual row checkboxes both ways, and toggles only
+  the rows the current filter shows. The per-group all/none links remain as a
+  secondary.
+
+## [0.67.0] - 2026-08-18
+### Changed
+- **The Fetch window now curates a selection across every destination type
+  before importing.** A **Fetch all** button reads every fetchable type in one
+  pass (single-type buttons still work and accumulate), and the preview becomes
+  one checklist grouped by type with per-group and global select-all/none. A
+  filter row narrows it — a search box over number and name, and **All / New /
+  Changes** chips — so large sets can be picked without ticking each row.
+  Importing opens a **consolidated review**: a per-type summary of what will be
+  created and updated, confirmed before anything lands, and the selected objects
+  are imported endpoints-first (extensions, dial groups, ERGs, then IVRs, then
+  DIDs) so routing resolves as it arrives. Nothing is ever deleted.
+
+## [0.66.0] - 2026-08-18
+### Added
+- **View ▸ Hide unrouted destinations.** A new checkbox in the Routing view
+  section drops every object nothing routes to from the canvas — the same set
+  the Unrouted tab isolates, hidden instead of shown. DIDs are sources and are
+  never hidden. It is a canvas view only: the export, the findings and the
+  traced map still see every object. The choice is saved with the project.
+
+## [0.65.0] - 2026-08-18
+### Added
+- **Fetch now covers DIDs, IVRs, dial groups and ERGs — not just extensions —
+  and flags the types that cannot be fetched at all.** The Fetch dialog offers a
+  button per fetchable type; each reads its list action through the proxy and
+  merges by number with the same tick-to-select, create/update, never-delete
+  contract as the extensions import. DID destinations, IVR key maps, ring-group
+  members and ERG members come across mapped to this builder's fields — a PBX
+  ERG's full member list and strategy are preserved on the object even though the
+  builder's ERG form edits a single ringing extension, so nothing is lost.
+  Voicemail, conferences, queues and agents are shown **flagged as not
+  fetchable** rather than omitted: the PBXware API — legacy `index.php` and the
+  v2 REST API alike — has no read action for those four, confirmed against
+  Bicom's own collection and by probing the live server, so they can only be
+  added by hand. Verified against a live tenant: 67 extensions, 15 DIDs, 16
+  IVRs, 31 dial groups, 2 ERGs.
+
+## [0.64.0] - 2026-08-18
+### Changed
+- **Save/export consolidated into the File menu.** The blank-template download,
+  which only lived in the Upload panel, is now a File-menu item beside Export
+  `.xlsx`, and the duplicate "This flow" workbook button — the same action as
+  Export — is removed from the Upload panel. The panel's workbook card becomes a
+  focused "Blank template" card for the download-fill-import path, and points at
+  File ▸ Export for saving the current flow.
+
+## [0.63.0] - 2026-08-18
+### Changed
+- **The Push dialog now matches the Fetch dialog.** Its target section is a
+  single Host field with the same one-click **Defaults** button and a Tenant
+  field — the https/http toggle and the tenant **Resolve** button are gone, since
+  the proxy handles the scheme and `tenant.list` is refused to a read/write-scoped
+  key anyway. **Test connection now probes with `pbxware.ext.list`**, the action
+  such a key is actually allowed, instead of `tenant.list`; a scoped key that can
+  push was previously stuck at "not connected", so live push never unlocked. Like
+  Fetch, it prefers the same-origin proxy and reports how many extensions the key
+  can read.
+
+## [0.62.0] - 2026-08-18
+### Added
+- **Fetch from PBXware.** A new File-menu entry reads objects from a tenant and
+  merges them into the flow, the reverse of the push. It matches by number: new
+  numbers are created, existing ones have their non-empty fields updated, and
+  nothing is ever deleted — the same safe contract as the CSV importers. The
+  preview lists every fetched object with a checkbox, plus Select all / None, so
+  only the ticked rows are imported; rows that already match are shown greyed and
+  cannot be ticked. It runs through the same-origin proxy when the app is served
+  by one, so the API key stays on the server and there is no CORS to negotiate.
+  **Extensions only for now**, because a scoped API key typically permits
+  `pbxware.ext.list` and little else; DIDs, IVRs, dial groups and ERGs are wired
+  to slot into the same fetcher registry the moment the key is granted their read
+  permissions, each validated through `ACCEPT` before it lands. Verified against a
+  live tenant of 67 extensions.
+- **Fetch dialog gained Server, Tenant and API-key fields** with a one-click
+  **Defaults** button for the test server. Filled fields drive the read through
+  the same-origin proxy, which accepts them as host/key overrides of its own
+  `.env` and reuses its resolve-IP pin when the host matches — so the firewalled
+  public name still reaches the internal address. Blank key means "use the
+  server's stored key." The key is held for the tab only, never saved.
+- **A same-origin proxy makes both the live read and the live push work without
+  CORS.** When the app is served by `cfbuilder-serve`, `/pbx-api` on the page's
+  own origin relays to the PBX with the API key injected server-side, so the
+  browser never holds the key and there is no cross-origin request to be
+  blocked — this is what lets a live push, not just a fetch, run from an ordinary
+  browser tab. It accepts the dialog's host/key fields as overrides of its
+  `.env`, reusing a resolve-IP pin when the host matches so a firewalled public
+  name still reaches the internal address, and it refuses write actions unless
+  it was started with `CFB_ALLOW_WRITE=1`.
+
+## [0.61.0] - 2026-08-17
+### Added
+- **Push extensions to PBXware.** File ▸ Push to PBXware builds the
+  `pbxware.ext.add` and `pbxware.ext.edit` requests for the extensions in the
+  flow, against a host and tenant you set. It reads what `pbxware.ext.list`
+  already holds and shows what it would create, what it would update and what it
+  would leave alone, before anything is sent. Extensions the PBX has that this
+  flow does not describe are listed and never touched — there is no delete.
+- **The requests can always be emitted, with no network at all.** Copy the URLs,
+  or download a shell script that reads the key from `$APIKEY` and never contains
+  it. That path matters because the API answers a plain GET and sends no CORS
+  header, so a page opened from disk or embedded in Confluence can send a request
+  and still not be allowed to read the reply. Live push is offered only once a
+  test connection proves the reply is readable, and the test says which of the two
+  it found — reachable but unreadable, or not reachable — rather than guessing.
+- **The API key is typed, or read from a `.env` you pick or drag onto the dialog.**
+  Either way it is held in memory for the tab only and never written into the
+  project file: Save `.json` and both embed hand-offs now go through one function
+  that strips it. A `.env` may also carry `PBXWARE_HOST` and `PBXWARE_TENANT`, so
+  the whole target arrives in one go, and the dialog names the file the key came
+  from — a stale `.env` otherwise looks identical to a fresh one, and pushing to
+  the wrong tenant is the mistake that causes. A file carrying no
+  `PBXWARE_API_KEY` changes nothing at all, so dropping the wrong file cannot
+  clear a key that is already working. A page cannot read a file path by itself,
+  so handing the file over is one deliberate click per session — that buys not
+  retyping the key, not invisibility.
+- **Generated SIP secrets and PINs, outbound only.** `ext.add` needs both, and
+  neither belongs in a project file that gets emailed or carried across tabs in a
+  URL, so they are generated per tab and offered as a credentials `.csv`.
+  Reloading forgets them, which makes that file the only copy. An edit never
+  sends them: rotating the secret of a handset that is already registered would
+  take a working phone off the air.
+- **When a live push is blocked, the dialog now names the fix.** The API sends no
+  CORS header, so a page opened from disk cannot read a reply even though the
+  request reached the PBX and took effect. Two ways out, and the dialog says both:
+  serve this file from the PBX host, which makes the page same-origin so the rule
+  never applies and nothing needs configuring, or add
+  `Access-Control-Allow-Origin: *` to the reply for `/index.php` — these are
+  simple GETs, so there is no preflight to handle, just that one header. **Copy
+  CORS test** hands you a `curl` command that shows whether the header is there,
+  and the connection test now recognises and confirms the same-origin case.
+
+
+### Notes
+- Queues, agents and conferences have no add or edit action in the PBXware API,
+  so they are never pushed and stay in the workbook. Seven of the ten object
+  types here have write actions; extensions are the first to be wired up, as a
+  proof of the path.
+- A failed request stops the run. Nothing after it is attempted, and the PBX's
+  own error text is shown rather than a guess at what it meant — the API reports
+  failure as an `error` key inside an HTTP 200, so the body is what gets checked.
+
+## [0.60.0] - 2026-08-04
+### Fixed
+- **A duplicate landed on top of the original.** The copy took the original's
+  coordinates verbatim, so both sat on the same pixel \u2014 the new one invisible
+  beneath the old, and an overlap reported that nobody caused. It now goes to the
+  first free space to the right, wrapping to the next row down, which keeps a
+  copy beside the thing it was copied from, level with it while there is room on
+  that row.
+- **Duplicate never redrew the canvas.** It refreshed the panel and stopped, so
+  the copy was not on screen until something else triggered a draw. The copy is
+  now selected, scrolled to and flashed, the same treatment the duplicate-number
+  links use.
+- A duplicated DID has no number, since one cannot be guessed. The flash now says
+  so \u2014 *"Give it a number"* \u2014 rather than leaving a finding to explain it.
+
+## [0.59.3]
+### Fixed
+- **Licences past the second were silently cut off.** The row could not wrap and
+  the value column was 106px; five chips are 256px, so 150px of it simply
+  vanished. Worse than an ellipsis, because a clipped chip still looks like a
+  whole chip \u2014 which is why it went unnoticed.
+- The row now wraps, and an extension widens to 230px at Full detail.
+  **Widening alone changed nothing**: at both 190px and 230px the line counts
+  were 1, 1, 2, 2, 3. Taking 1px off the chip margin is what moved them to
+  1, 1, 1, 2, 2 \u2014 so three licences now sit on one line and five on two.
+- The height estimate wraps the chips exactly as the CSS does, so the layout
+  guards work from the real height rather than assuming one line.
+
+## [0.59.2]
+### Fixed
+- **Mobile was invisible and the deeper licences appeared to shout over it.**
+  The ramp tinted each chip's fill, and the palest step came out `#eef4fb`,
+  byte-identical to `--blue-l`, which is the extension node's own background \u2014
+  so the first chip had a contrast of 1.00 against the surface it sat on and the
+  second only 1.10. I had measured the ramp against white and against the dark
+  canvas, but never against the node it actually renders on.
+- The ranking now lives in the **border**. A line only has to be seen, not to
+  carry text, so it can range much wider than a fill while one ink stays legible
+  on every chip. Every border clears 1.53 to 7.30 against the node in light and
+  1.97 to 6.59 in dark, adjacent steps are 52 to 62 apart in RGB, and the ink
+  reads 10.91 on every chip instead of sliding from 9.86 down to 5.58.
+
+## [0.59.1]
+### Fixed
+- The extension detail was unreachable. I recommended it "at Full detail behind
+  the i button", then built only the Full detail half \u2014 so a single node had no
+  way to show it and switching the whole canvas was the only route. Extensions
+  now carry an **i** button, in the header rather than a control strip: a strip
+  costs 30px and extensions are the type there are most of. No **S**, because
+  "number only" means nothing for an endpoint.
+- The sample's extensions had no department, handset or licence, so turning the
+  feature on showed four nodes reading *not set*. They now carry realistic
+  values, including a softphone and a handset with no licence.
+
+## [0.59.0]
+### Added
+- **Extensions show their phone and licences at Full detail**: department when
+  set, the handset, and a chip per S-NET Connect licence.
+- Licence chips use five tints of the extension's own blue, in licence order, so
+  the colour carries the same meaning as the position. Five separate hues was
+  the obvious idea and the measurements ruled it out \u2014 every candidate sat
+  within 31 to 62 of a colour already meaning DID, ERG or queue. A single-hue
+  ramp with one text colour failed too: the middle step read 3.15 on white and
+  2.74 on dark ink. Light tints clear AA at every step, 9.86 down to 5.58.
+- Dark mode gets its own ramp rather than reusing the light one, which measured
+  11 to 12 against the dark surface and would have glowed. Every dark step also
+  clears AA, 8.65 down to 4.65.
+- The handset is a two-state chip \u2014 desk phone or software client \u2014 matched on
+  the words people type rather than a list of vendors. Anything unrecognised is
+  treated as a handset.
+### Note
+- Colour is never the only signal: every chip keeps its full name, because a
+  9px blue ramp is exactly what a colour-blind reader cannot separate.
+
+## [0.58.0]
+### Added
+- **Duplicate local destination number** is now visible on the canvas, not only
+  in the findings. Both objects get a red edge stripe and their number in red,
+  plus the warning icon naming what they clash with. A stripe rather than an
+  outline, because the selection ring is also 2px and the two together read as
+  one thick smear.
+- The finding is renamed to **Duplicate local destination number** and each
+  object is a link that selects it, scrolls it into view and flashes it \u2014
+  un-hiding its type and switching to the All tab first if need be.
+### Fixed
+- The check missed **conferences and agents** entirely, and only compared across
+  types \u2014 so two queues both on 4001 went unreported. It now covers all eight
+  local destination types and same-type clashes.
+
+## [0.57.1]
+### Changed
+- The project name is now the loudest thing in the banner: wider, 14px bold on a
+  lighter field with an amber edge, and the tool's own title stepped back to
+  make room for it. The name decides what every file is called, and the fixed
+  product name does not change.
+- While it is unnamed the field is outlined in dashed amber and reads *Name this
+  flow*, so it is obvious before a download turns up called `call_flow`.
+- Placeholder text is white at 72%. The lower alphas looked right but measured
+  3.25 against the field, below AA.
+
 ## [0.57.0]
 ### Added
 - **Grey out empty types**, on by default, in the Routing view. A type the flow
